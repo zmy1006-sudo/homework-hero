@@ -205,9 +205,9 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
     };
   }, [status, handleComplete]);
   
-  // SVG 环形参数
-  const size = typeof window !== 'undefined' && window.innerWidth >= 768 ? 280 : 200;
-  const strokeWidth = 12;
+  // SVG 环形参数 - 调整尺寸以确保在不同屏幕上都能完整显示
+  const size = typeof window !== 'undefined' && window.innerWidth >= 768 ? 260 : 180;
+  const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress);
@@ -215,23 +215,27 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
   // 中心点
   const center = size / 2;
   
+  // 计算文字大小
+  const timeFontSize = typeof window !== 'undefined' && window.innerWidth >= 768 ? '56px' : '40px';
+  const labelFontSize = typeof window !== 'undefined' && window.innerWidth >= 768 ? '14px' : '12px';
+  
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="relative bg-white rounded-3xl w-full max-w-md mx-4 p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="relative bg-white rounded-3xl w-full max-w-md mx-auto p-5 shadow-xl max-h-[90vh] overflow-y-auto">
         {/* 关闭按钮 */}
         {status === 'idle' && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-xl transition-colors"
+            className="absolute top-3 right-3 p-2 hover:bg-gray-100 rounded-xl transition-colors z-10"
           >
             <XCircle className="w-6 h-6 text-gray-400" />
           </button>
         )}
         
         {/* 任务标题 */}
-        <div className="text-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">{task.title}</h2>
-          <p className="text-sm text-gray-500">{task.duration}分钟</p>
+        <div className="text-center mb-4 pt-2">
+          <h2 className="text-lg font-semibold text-gray-800 truncate px-8">{task.title}</h2>
+          <p className="text-sm text-gray-500 mt-1">{task.duration}分钟</p>
         </div>
         
         {/* 环形倒计时 */}
@@ -266,17 +270,18 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
           </svg>
           
           {/* 中央时间显示 */}
-          <div className="absolute flex flex-col items-center justify-center">
+          <div className="absolute flex flex-col items-center justify-center" style={{ width: size, height: size }}>
             <span 
               className="font-bold tabular-nums transition-colors duration-300"
               style={{ 
-                fontSize: typeof window !== 'undefined' && window.innerWidth >= 768 ? '64px' : '48px',
-                color: getProgressColor()
+                fontSize: timeFontSize,
+                color: getProgressColor(),
+                lineHeight: 1.2
               }}
             >
               {formatTime(remainingSeconds)}
             </span>
-            <span className="text-sm text-gray-500 mt-1">
+            <span className="text-gray-500 mt-1" style={{ fontSize: labelFontSize }}>
               {status === 'idle' ? '准备开始' : status === 'running' ? '专注中...' : '已暂停'}
             </span>
           </div>
@@ -293,15 +298,14 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
         )}
         
         {/* 控制按钮 */}
-        <div className="flex justify-center gap-3 mb-4">
+        <div className="flex flex-wrap justify-center gap-3 mb-4 px-2">
           {status === 'idle' && (
             <button
               onClick={handleStart}
-              className="flex items-center gap-2 px-8 py-3 bg-vibrant-primary text-white rounded-xl font-medium hover:bg-sky-400 transition-colors"
-              style={{ width: '120px', height: '48px' }}
+              className="flex items-center justify-center gap-2 px-6 py-3 min-w-[100px] bg-vibrant-primary text-white rounded-xl font-medium hover:bg-sky-400 transition-colors"
             >
               <Play className="w-5 h-5" />
-              开始
+              <span>开始</span>
             </button>
           )}
           
@@ -309,27 +313,24 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
             <>
               <button
                 onClick={handlePause}
-                className="flex items-center gap-2 px-5 py-2.5 bg-vibrant-primary text-white rounded-xl font-medium hover:bg-sky-400 transition-colors"
-                style={{ width: '80px', height: '40px' }}
+                className="flex items-center justify-center gap-1.5 px-4 py-2.5 min-w-[72px] bg-vibrant-primary text-white rounded-xl font-medium hover:bg-sky-400 transition-colors"
               >
                 <Pause className="w-4 h-4" />
-                暂停
+                <span className="text-sm">暂停</span>
               </button>
               <button
                 onClick={handleComplete}
-                className="flex items-center gap-2 px-5 py-2.5 bg-green-500 text-white rounded-xl font-medium hover:bg-green-400 transition-colors"
-                style={{ width: '80px', height: '40px' }}
+                className="flex items-center justify-center gap-1.5 px-4 py-2.5 min-w-[72px] bg-green-500 text-white rounded-xl font-medium hover:bg-green-400 transition-colors"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                完成
+                <span className="text-sm">完成</span>
               </button>
               <button
                 onClick={handleAbandon}
-                className="flex items-center gap-2 px-5 py-2.5 bg-red-400 text-white rounded-xl font-medium hover:bg-red-300 transition-colors"
-                style={{ width: '80px', height: '40px' }}
+                className="flex items-center justify-center gap-1.5 px-4 py-2.5 min-w-[72px] bg-red-400 text-white rounded-xl font-medium hover:bg-red-300 transition-colors"
               >
                 <XCircle className="w-4 h-4" />
-                放弃
+                <span className="text-sm">放弃</span>
               </button>
             </>
           )}
@@ -338,27 +339,24 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
             <>
               <button
                 onClick={handleResume}
-                className="flex items-center gap-2 px-8 py-3 bg-vibrant-primary text-white rounded-xl font-medium hover:bg-sky-400 transition-colors"
-                style={{ width: '120px', height: '48px' }}
+                className="flex items-center justify-center gap-2 px-6 py-3 min-w-[100px] bg-vibrant-primary text-white rounded-xl font-medium hover:bg-sky-400 transition-colors"
               >
                 <Play className="w-5 h-5" />
-                继续
+                <span>继续</span>
               </button>
               <button
                 onClick={handleComplete}
-                className="flex items-center gap-2 px-5 py-2.5 bg-green-500 text-white rounded-xl font-medium hover:bg-green-400 transition-colors"
-                style={{ width: '80px', height: '40px' }}
+                className="flex items-center justify-center gap-1.5 px-4 py-2.5 min-w-[72px] bg-green-500 text-white rounded-xl font-medium hover:bg-green-400 transition-colors"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                完成
+                <span className="text-sm">完成</span>
               </button>
               <button
                 onClick={handleAbandon}
-                className="flex items-center gap-2 px-5 py-2.5 bg-red-400 text-white rounded-xl font-medium hover:bg-red-300 transition-colors"
-                style={{ width: '80px', height: '40px' }}
+                className="flex items-center justify-center gap-1.5 px-4 py-2.5 min-w-[72px] bg-red-400 text-white rounded-xl font-medium hover:bg-red-300 transition-colors"
               >
                 <XCircle className="w-4 h-4" />
-                放弃
+                <span className="text-sm">放弃</span>
               </button>
             </>
           )}

@@ -204,7 +204,8 @@ export function TaskList({ userId, onTaskChange }: TaskListProps) {
             className="bg-white rounded-2xl shadow-sm border border-white/50 overflow-hidden"
           >
             {/* 类别标题栏 */}
-            <button
+            
+                            <button
               onClick={() => toggleCategory(category.id)}
               className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
             >
@@ -220,7 +221,8 @@ export function TaskList({ userId, onTaskChange }: TaskListProps) {
               </div>
               <div className="flex items-center gap-2">
                 {isCustom && (
-                  <button
+                  
+                            <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeleteCategory(category.id, category.name);
@@ -251,55 +253,59 @@ export function TaskList({ userId, onTaskChange }: TaskListProps) {
                       className="px-4 py-3 border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50 transition-colors"
                     >
                       <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusStyle.bg} ${statusStyle.text} border ${statusStyle.border}`}>
+                        <div className="flex-1 min-w-0 pr-2">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusStyle.bg} ${statusStyle.text} border ${statusStyle.border}`}>
                               {statusStyle.icon}
-                              <span className="ml-1">{getStatusText(task.status)}</span>
+                              <span className="whitespace-nowrap">{getStatusText(task.status)}</span>
                             </span>
-                            <span className="text-xs text-gray-400 flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
+                            <span className="text-xs text-gray-400 flex items-center gap-1 whitespace-nowrap">
+                              <Clock className="w-3 h-3 flex-shrink-0" />
                               {task.duration}分钟
                             </span>
                           </div>
                           <h4 className="font-medium text-gray-800 truncate">{task.title}</h4>
                           {task.description && (
-                            <p className="text-sm text-gray-500 truncate mt-0.5">{task.description}</p>
+                            <p className="text-sm text-gray-500 truncate">{task.description}</p>
                           )}
                         </div>
                         
                         {/* 操作按钮 */}
-                        <div className="flex items-center gap-1 ml-2">
+                        <div className="flex items-center gap-0.5 ml-2">
                           {task.status === 'pending' && (
+                            
                             <button
                               onClick={() => handleStartTask(task)}
-                              className="p-2 hover:bg-green-100 rounded-xl transition-colors"
+                              className="p-2.5 hover:bg-green-100 rounded-xl transition-colors"
                               title="开始任务"
                             >
                               <Timer className="w-4 h-4 text-green-500" />
                             </button>
                           )}
                           {task.status === 'in_progress' && (
+                            
                             <button
                               onClick={() => handleStartTask(task)}
-                              className="p-2 hover:bg-blue-100 rounded-xl transition-colors"
+                              className="p-2.5 hover:bg-blue-100 rounded-xl transition-colors"
                               title="继续任务"
                             >
                               <Timer className="w-4 h-4 text-blue-500" />
                             </button>
                           )}
                           {task.status === 'completed' && (
+                            
                             <button
                               onClick={() => handleCompleteTask(task.id)}
-                              className="p-2 hover:bg-blue-100 rounded-xl transition-colors"
+                              className="p-2.5 hover:bg-blue-100 rounded-xl transition-colors"
                               title="查看"
                             >
                               <CheckCircle2 className="w-4 h-4 text-blue-500" />
                             </button>
                           )}
-                          <button
+                          
+                            <button
                             onClick={() => handleDeleteTask(task.id)}
-                            className="p-2 hover:bg-red-100 rounded-xl transition-colors"
+                            className="p-2.5 hover:bg-red-100 rounded-xl transition-colors"
                             title="删除任务"
                           >
                             <Trash2 className="w-4 h-4 text-red-400" />
@@ -317,7 +323,8 @@ export function TaskList({ userId, onTaskChange }: TaskListProps) {
       
       {/* 添加类别按钮 */}
       {categories.filter(c => c.isCustom).length < 5 && (
-        <button
+        
+                            <button
           onClick={() => setShowCategoryModal(true)}
           className="w-full py-3 border-2 border-dashed border-gray-200 rounded-2xl text-gray-500 hover:border-vibrant-primary hover:text-vibrant-primary transition-colors text-sm font-medium"
         >
@@ -352,7 +359,8 @@ export function TaskList({ userId, onTaskChange }: TaskListProps) {
                 <label className="block text-sm font-medium text-gray-700 mb-2">选择图标</label>
                 <div className="flex flex-wrap gap-2">
                   {['📚', '🎨', '🎵', '🏃', '🔬', '💻', '🌱', '🎮', '🏀', '📖'].map((emoji) => (
-                    <button
+                    
+                            <button
                       key={emoji}
                       type="button"
                       onClick={() => setNewCategoryEmoji(emoji)}
@@ -370,13 +378,15 @@ export function TaskList({ userId, onTaskChange }: TaskListProps) {
             </div>
             
             <div className="flex gap-3 mt-6">
-              <button
+              
+                            <button
                 onClick={() => setShowCategoryModal(false)}
                 className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors"
               >
                 取消
               </button>
-              <button
+              
+                            <button
                 onClick={handleAddCategory}
                 disabled={!newCategoryName.trim()}
                 className="flex-1 py-3 rounded-xl bg-vibrant-primary text-white font-medium hover:bg-sky-400 transition-colors disabled:opacity-50"

@@ -137,11 +137,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
             <BookOpen className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-2xl font-bold text-gray-800 mb-2">作业闯关积分系统</h1>
-          <p className="text-muted-foreground">让孩子学习更有动力</p>
+          <p className="text-muted-foreground text-sm">让孩子学习更有动力</p>
         </div>
 
         {/* 卡片容器 */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-5 sm:p-6">
           {/* 步骤指示器 */}
           {step === 'form' && (
             <button
@@ -223,7 +223,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   placeholder="请输入11位手机号"
                   maxLength={11}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-base"
                 />
               </div>
 
@@ -237,7 +237,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       placeholder="请输入姓名"
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-base"
                     />
                   </div>
                   <div>
@@ -245,7 +245,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                     <select
                       value={formData.grade}
                       onChange={(e) => handleInputChange('grade', e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none text-base"
                     >
                       <option value="">请选择年级</option>
                       {GRADE_OPTIONS.map((option) => (
@@ -268,7 +268,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                     onChange={(e) => handleInputChange('boundPhone', e.target.value)}
                     placeholder="请输入孩子的手机号"
                     maxLength={11}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-base"
                   />
                 </div>
               )}
@@ -283,7 +283,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                     onChange={(e) => handleInputChange('classCode', e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="请输入6位班级码"
                     maxLength={6}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-base"
                   />
                 </div>
               )}
