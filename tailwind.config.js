@@ -17,6 +17,26 @@ module.exports = {
 		},
 		extend: {
 			colors: {
+				// 活力童趣配色 (V1.5)
+				vibrant: {
+					primary: '#4FC3F7', // 天空蓝 - 主色
+					secondary: '#F48FB1', // 樱花粉 - 辅色
+					background: '#FAFAFA', // 纯净白 - 背景
+					card: '#FFFFFF', // 白色 - 卡片
+				},
+				// 任务类别颜色
+				category: {
+					math: '#42A5F5', // 数学 - 明亮蓝
+					chinese: '#66BB6A', // 语文 - 活力绿
+					english: '#FFA726', // 英语 - 阳光橙
+					science: '#AB47BC', // 科学 - 梦幻紫
+				},
+				// 任务状态颜色
+				status: {
+					pending: '#9E9E9E', // 待开始 - 灰色
+					in_progress: '#4CAF50', // 进行中 - 绿色
+					completed: '#2196F3', // 已完成 - 蓝色
+				},
 				// 莫兰迪色系 (Morandi Colors)
 				morandi: {
 					// 灰粉色
@@ -116,7 +136,7 @@ module.exports = {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#8B9A8B', // 莫兰迪灰绿色
+					DEFAULT: '#4FC3F7', // 天空蓝 - 活力童趣主色
 					foreground: '#FFFFFF',
 				},
 				secondary: {

@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { User } from '../../types';
 import { clearUser, maskPhone } from '../../utils';
-import { BookOpen, User as UserIcon, LogOut, Star, Trophy, Target } from 'lucide-react';
+import { BookOpen, User as UserIcon, LogOut, Star, Trophy, Target, Plus, Clock } from 'lucide-react';
+import { TaskModal } from '../tasks/TaskModal';
+import { TaskList } from '../tasks/TaskList';
 
 interface HomePageProps {
   user: User;
@@ -8,6 +11,9 @@ interface HomePageProps {
 }
 
 export function HomePage({ user, onLogout }: HomePageProps) {
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  
   const handleLogout = () => {
     clearUser();
     onLogout();
@@ -31,13 +37,13 @@ export function HomePage({ user, onLogout }: HomePageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-morandi-blue-50 via-morandi-beige-50 to-morandi-green-50">
+    <div className="min-h-screen bg-vibrant-background">
       {/* 顶部导航 */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
         <div className="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-primary" />
+            <div className="w-10 h-10 bg-vibrant-primary/20 rounded-xl flex items-center justify-center">
+              <BookOpen className="w-5 h-5 text-vibrant-primary" />
             </div>
             <div>
               <h1 className="font-semibold text-gray-800">作业闯关积分系统</h1>
@@ -56,10 +62,10 @@ export function HomePage({ user, onLogout }: HomePageProps) {
 
       <main className="max-w-md mx-auto px-4 py-6 space-y-6">
         {/* 用户信息卡片 */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-sm border border-white/50">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-white/50">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary/30 to-morandi-green-300 rounded-2xl flex items-center justify-center">
-              <UserIcon className="w-8 h-8 text-primary" />
+            <div className="w-16 h-16 bg-gradient-to-br from-vibrant-primary/30 to-vibrant-secondary/30 rounded-2xl flex items-center justify-center">
+              <UserIcon className="w-8 h-8 text-vibrant-primary" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-800">
@@ -73,6 +79,30 @@ export function HomePage({ user, onLogout }: HomePageProps) {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* 任务管理模块 */}
+        <div className="bg-white rounded-3xl p-4 shadow-sm border border-white/50">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-vibrant-primary" />
+              <h3 className="font-semibold text-gray-800">我的任务</h3>
+            </div>
+            <button
+              onClick={() => setShowTaskModal(true)}
+              className="flex items-center gap-1 px-3 py-1.5 bg-vibrant-primary text-white rounded-xl text-sm font-medium hover:bg-sky-400 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              添加任务
+            </button>
+          </div>
+          
+          {/* 任务列表 */}
+          <TaskList 
+            key={refreshKey}
+            userId={user.id} 
+            onTaskChange={() => setRefreshKey(k => k + 1)} 
+          />
         </div>
 
         {/* 积分概览 - 仅学生显示 */}
@@ -165,6 +195,14 @@ export function HomePage({ user, onLogout }: HomePageProps) {
           </div>
         )}
       </main>
+
+      {/* 任务创建弹窗 */}
+      <TaskModal
+        isOpen={showTaskModal}
+        onClose={() => setShowTaskModal(false)}
+        userId={user.id}
+        onSuccess={() => setRefreshKey(k => k + 1)}
+      />
     </div>
   );
 }

@@ -13,6 +13,40 @@ export interface User {
   createdAt?: string;
 }
 
+// ============ 任务管理相关类型 ============
+
+// 任务状态
+export type TaskStatus = 'pending' | 'in_progress' | 'completed';
+
+// 预设类别
+export type PresetCategory = 'math' | 'chinese' | 'english' | 'science';
+
+// 任务类别（预设+自定义）
+export type TaskCategory = PresetCategory | string;
+
+// 任务类别配置
+export interface CategoryConfig {
+  id: TaskCategory;
+  name: string;
+  emoji: string;
+  color: string;
+  isCustom?: boolean;
+}
+
+// 任务
+export interface Task {
+  id: string;
+  title: string; // 任务标题（最长50字符）
+  category: TaskCategory;
+  duration: number; // 分钟数（1-120）
+  description?: string; // 任务描述（可选，最长200字符）
+  status: TaskStatus;
+  createdAt: string;
+  startedAt?: string; // 开始时间
+  completedAt?: string; // 完成时间
+  userId: string; // 所属用户
+}
+
 // 登录表单数据
 export interface LoginFormData {
   phone: string;
