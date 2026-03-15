@@ -80,4 +80,96 @@ export const GRADE_OPTIONS = [
 export const STORAGE_KEYS = {
   USER: 'homework_user',
   TOKEN: 'homework_token',
+  POINTS: 'homework_points',
+  POINTS_HISTORY: 'homework_points_history',
+  STREAK_DATA: 'homework_streak_data',
 } as const;
+
+// ============ 积分系统相关类型 ============
+
+// 段位等级
+export type RankLevel = 'beginner' | 'student' | 'star' | 'god' | 'legend';
+
+// 段位配置
+export interface RankConfig {
+  level: RankLevel;
+  name: string;
+  icon: string;
+  minPoints: number;
+  maxPoints: number;
+  color: string;
+  bgColor: string;
+}
+
+// 段位配置列表
+export const RANK_CONFIGS: RankConfig[] = [
+  { level: 'beginner', name: '初心学者', icon: '🌱', minPoints: 0, maxPoints: 499, color: '#2E7D32', bgColor: '#A5D6A7' },
+  { level: 'student', name: '勤学少年', icon: '📚', minPoints: 500, maxPoints: 1999, color: '#0277BD', bgColor: '#81D4FA' },
+  { level: 'star', name: '学霸之星', icon: '⭐', minPoints: 2000, maxPoints: 4999, color: '#F57F17', bgColor: '#FFD54F' },
+  { level: 'god', name: '学神降临', icon: '🎓', minPoints: 5000, maxPoints: 9999, color: '#7B1FA2', bgColor: '#CE93D8' },
+  { level: 'legend', name: '传奇学神', icon: '👑', minPoints: 10000, maxPoints: Infinity, color: '#FF8F00', bgColor: '#FFCA28' },
+];
+
+// 积分行为类型
+export type PointsAction = 
+  | 'on_time_start'       // 按时开始
+  | 'on_time_complete'   // 按时完成
+  | 'early_complete'     // 提前完成
+  | 'first_complete'     // 首次完成
+  | 'streak_3'           // 连续3天
+  | 'streak_7'           // 连续7天
+  | 'streak_30'          // 连续30天
+  | 'overdue_complete'   // 超时完成
+  | 'abandon_task';     // 放弃任务
+
+// 积分行为配置
+export interface PointsActionConfig {
+  action: PointsAction;
+  description: string;
+  points: number;
+  isBonus: boolean; // true=加分, false=扣分
+}
+
+// 积分行为配置列表
+export const POINTS_ACTIONS: PointsActionConfig[] = [
+  { action: 'on_time_start', description: '按时开始任务', points: 5, isBonus: true },
+  { action: 'on_time_complete', description: '按时完成任务', points: 10, isBonus: true },
+  { action: 'early_complete', description: '提前完成任务', points: 10, isBonus: true },
+  { action: 'first_complete', description: '首次完成该任务', points: 20, isBonus: true },
+  { action: 'streak_3', description: '连续3天完成任务', points: 30, isBonus: true },
+  { action: 'streak_7', description: '连续7天完成任务', points: 100, isBonus: true },
+  { action: 'streak_30', description: '连续30天完成任务', points: 500, isBonus: true },
+  { action: 'overdue_complete', description: '超时完成任务', points: 1, isBonus: false },
+  { action: 'abandon_task', description: '放弃任务', points: 5, isBonus: false },
+];
+
+// 积分记录
+export interface PointsRecord {
+  id: string;
+  userId: string;
+  action: PointsAction;
+  points: number; // 正数加分，负数扣分
+  taskId?: string;
+  taskTitle?: string;
+  createdAt: string;
+  note?: string;
+}
+
+// 连续打卡数据
+export interface StreakData {
+  userId: string;
+  currentStreak: number; // 当前连续天数
+  longestStreak: number; // 最长连续天数
+  lastCompleteDate: string; // 上次完成日期 (YYYY-MM-DD)
+  completedTaskIds: string[]; // 今日已完成的 taskId
+}
+
+// 用户积分数据
+export interface UserPoints {
+  userId: string;
+  totalPoints: number; // 总积分
+  todayPoints: number; // 今日积分
+  lastPointsDate: string; // 上次积分日期 (YYYY-MM-DD)
+  streakData: StreakData;
+  rankLevel: RankLevel;
+}

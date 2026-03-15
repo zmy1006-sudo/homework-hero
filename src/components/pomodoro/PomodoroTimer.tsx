@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Play, Pause, CheckCircle2, XCircle, AlertCircle, Coffee } from 'lucide-react';
+import { Play, Pause, CheckCircle2, XCircle, AlertCircle, Coffee, Sparkles, Trophy } from 'lucide-react';
 import { Task } from '../../types';
 import { updateTaskStatus } from '../../utils/tasks';
+import { addPointsRecord, updateStreak, getUserPoints } from '../../utils';
 
 // 分心行为类型
 export type DistractionType = 'water' | 'stretch' | 'toilet' | 'eat' | 'daze' | 'book' | 'toy' | 'other';
@@ -69,6 +70,8 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
   const [overtimeSeconds, setOvertimeSeconds] = useState(0); // 超时秒数
   const [showRestModal, setShowRestModal] = useState(false); // 休息提醒
   const [restRemainingSeconds, setRestRemainingSeconds] = useState(5 * 60); // 休息倒计时
+  const [hasStarted, setHasStarted] = useState(false); // 是否已开始过
+  const [pointsEarned, setPointsEarned] = useState<{ points: number; descriptions: string[] } | null>(null); // 本次获得的积分
   
   const intervalRef = useRef<number | null>(null);
   const restIntervalRef = useRef<number | null>(null);
@@ -189,9 +192,17 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
       startTimeRef.current = Date.now();
       // 保存倒计时状态到 localStorage
       saveTimerState(task.id, task.duration);
+      // 标记已开始
+      setHasStarted(true);
+      
+      // 添加积分：按时开始 (+5分)
+      const result = addPointsRecord(task.userId, 'on_time_start', task.id, task.title);
+      if (result.points > 0) {
+        console.log(`按时开始任务 +${result.points}分`);
+      }
     }
     setStatus('running');
-  }, [status, task.id, task.duration, saveTimerState]);
+  }, [status, task.id, task.duration, task.userId, task.title, saveTimerState]);
   
   // 暂停倒计时
   const handlePause = useCallback(() => {
@@ -231,6 +242,63 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
     // 计算超时扣分
     const { minutes: overtimeMinutes, points: deductedPoints } = calculateOvertimePenalty();
     
+    // 获取用户当前积分数据
+    const userPoints = getUserPoints(task.userId);
+    
+    // 计算积分获取
+    let totalPoints = 0;
+    const descriptions: string[] = [];
+    
+    // 检查是否是首次完成该任务
+    const taskKey = `task_first_complete_${task.id}`;
+    const isFirstComplete = !localStorage.getItem(taskKey);
+    if (isFirstComplete) {
+      localStorage.setItem(taskKey, 'true');
+      const firstResult = addPointsRecord(task.userId, 'first_complete', task.id, task.title);
+      if (firstResult.points > 0) {
+        totalPoints += firstResult.points;
+        descriptions.push(`首次完成: +${firstResult.points}分`);
+      }
+    }
+    
+    // 根据完成情况添加积分
+    if (isOvertime && overtimeMinutes > 0) {
+      // 超时完成：扣除超时分钟数 × 1分
+      const overdueResult = addPointsRecord(task.userId, 'overdue_complete', task.id, task.title, overtimeMinutes);
+      // 超时是负分
+      if (overdueResult.points < 0) {
+        totalPoints += overdueResult.points;
+        descriptions.push(`超时完成: ${overdueResult.points}分`);
+      }
+    } else if (remainingSeconds > 0) {
+      // 提前完成：10分 + 提前分钟 × 1分
+      const earlyMinutes = Math.floor(remainingSeconds / 60);
+      const earlyResult = addPointsRecord(task.userId, 'early_complete', task.id, task.title, earlyMinutes);
+      if (earlyResult.points > 0) {
+        totalPoints += earlyResult.points;
+        descriptions.push(`提前完成: +${earlyResult.points}分 (含提前奖励)`);
+      }
+    } else {
+      // 按时完成：10分
+      const onTimeResult = addPointsRecord(task.userId, 'on_time_complete', task.id, task.title);
+      if (onTimeResult.points > 0) {
+        totalPoints += onTimeResult.points;
+        descriptions.push(`按时完成: +${onTimeResult.points}分`);
+      }
+    }
+    
+    // 更新连续打卡
+    const streakResult = updateStreak(task.userId, task.id);
+    if (streakResult.streakBonus > 0) {
+      totalPoints += streakResult.streakBonus;
+      descriptions.push(`连续${streakResult.streakDays}天打卡: +${streakResult.streakBonus}分`);
+    }
+    
+    // 保存本次获得的积分信息，用于显示
+    if (totalPoints !== 0 || descriptions.length > 0) {
+      setPointsEarned({ points: totalPoints, descriptions });
+    }
+    
     // 更新任务状态为已完成
     updateTaskStatus(task.id, 'completed');
     
@@ -263,7 +331,7 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
     
     // 触发完成回调（传入超时信息）
     onComplete?.(task, distractions.length, overtimeMinutes, deductedPoints);
-  }, [task, distractions.length, isOvertime, onComplete, clearTimerState, calculateOvertimePenalty]);
+  }, [task, distractions.length, isOvertime, onComplete, clearTimerState, calculateOvertimePenalty, remainingSeconds]);
   
   // 确认完成（休息后）
   const handleConfirmComplete = useCallback(() => {
@@ -292,6 +360,11 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
     // 清除倒计时状态
     clearTimerState();
     
+    // 如果已开始过任务，扣除放弃积分 (-5分)
+    if (hasStarted) {
+      addPointsRecord(task.userId, 'abandon_task', task.id, task.title);
+    }
+    
     // 更新任务状态为待开始
     updateTaskStatus(task.id, 'pending');
     
@@ -301,7 +374,7 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
     setRemainingSeconds(task.duration * 60);
     setDistractions([]);
     onAbandon?.(task);
-  }, [task, onAbandon, clearTimerState]);
+  }, [task, onAbandon, clearTimerState, hasStarted]);
   
   // 记录分心
   const handleDistraction = useCallback((type: DistractionType) => {
@@ -653,6 +726,26 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
       {showRestModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="relative bg-white rounded-3xl w-full max-w-sm mx-auto p-6 shadow-xl text-center">
+            {/* 积分获得提示 */}
+            {pointsEarned && pointsEarned.descriptions.length > 0 && (
+              <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-100">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Sparkles className="w-5 h-5 text-green-500" />
+                  <span className="text-green-600 font-semibold">本次获得积分</span>
+                </div>
+                {pointsEarned.descriptions.map((desc, idx) => (
+                  <p key={idx} className="text-sm text-green-700">{desc}</p>
+                ))}
+                {pointsEarned.points !== 0 && (
+                  <div className="mt-2 pt-2 border-t border-green-200">
+                    <span className="text-lg font-bold text-green-600">
+                      {pointsEarned.points > 0 ? '+' : ''}{pointsEarned.points} 分
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+            
             {/* 超时提示 */}
             {isOvertime && (
               <div className="mb-4 p-3 bg-red-50 rounded-xl">
@@ -660,7 +753,7 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
                   加油！超时了哦💪 别灰心！
                 </p>
                 <p className="text-sm text-red-500">
-                  超时了 {overtimeMinutes} 分钟，扣除 {deductedPoints} 分
+                  超时了 {overtimeMinutes} 分钟
                 </p>
               </div>
             )}
