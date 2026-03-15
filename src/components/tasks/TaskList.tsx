@@ -7,7 +7,8 @@ import {
   Clock, 
   MoreVertical,
   Trash2,
-  Edit
+  Edit,
+  Timer
 } from 'lucide-react';
 import { Task, TaskStatus } from '../../types';
 import { 
@@ -22,6 +23,7 @@ import {
   deleteCustomCategory,
   getCategoryConfig
 } from '../../utils/tasks';
+import { PomodoroTimer } from '../pomodoro/PomodoroTimer';
 
 interface TaskListProps {
   userId: string;
@@ -34,6 +36,7 @@ export function TaskList({ userId, onTaskChange }: TaskListProps) {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryEmoji, setNewCategoryEmoji] = useState('📚');
+  const [activePomodoroTask, setActivePomodoroTask] = useState<Task | null>(null);
   
   const categories = getAllCategories();
   
@@ -63,11 +66,27 @@ export function TaskList({ userId, onTaskChange }: TaskListProps) {
     });
   };
   
-  // 开始任务
-  const handleStartTask = (taskId: string) => {
-    updateTaskStatus(taskId, 'in_progress');
+  // 开始任务 - 打开番茄钟
+  const handleStartTask = (task: Task) => {
+    setActivePomodoroTask(task);
+  };
+  
+  // 番茄钟完成回调
+  const handlePomodoroComplete = (completedTask: Task, distractionCount: number) => {
     loadTasks();
     onTaskChange?.();
+    setActivePomodoroTask(null);
+    // 可以在这里添加奖励积分的逻辑
+    if (distractionCount === 0) {
+      console.log('任务完成，无分心！');
+    }
+  };
+  
+  // 番茄钟放弃回调
+  const handlePomodoroAbandon = (abandonedTask: Task) => {
+    loadTasks();
+    onTaskChange?.();
+    setActivePomodoroTask(null);
   };
   
   // 完成任务
@@ -253,18 +272,27 @@ export function TaskList({ userId, onTaskChange }: TaskListProps) {
                         <div className="flex items-center gap-1 ml-2">
                           {task.status === 'pending' && (
                             <button
-                              onClick={() => handleStartTask(task.id)}
+                              onClick={() => handleStartTask(task)}
                               className="p-2 hover:bg-green-100 rounded-xl transition-colors"
                               title="开始任务"
                             >
-                              <Play className="w-4 h-4 text-green-500" />
+                              <Timer className="w-4 h-4 text-green-500" />
                             </button>
                           )}
                           {task.status === 'in_progress' && (
                             <button
+                              onClick={() => handleStartTask(task)}
+                              className="p-2 hover:bg-blue-100 rounded-xl transition-colors"
+                              title="继续任务"
+                            >
+                              <Timer className="w-4 h-4 text-blue-500" />
+                            </button>
+                          )}
+                          {task.status === 'completed' && (
+                            <button
                               onClick={() => handleCompleteTask(task.id)}
                               className="p-2 hover:bg-blue-100 rounded-xl transition-colors"
-                              title="完成任务"
+                              title="查看"
                             >
                               <CheckCircle2 className="w-4 h-4 text-blue-500" />
                             </button>
@@ -358,6 +386,16 @@ export function TaskList({ userId, onTaskChange }: TaskListProps) {
             </div>
           </div>
         </div>
+      )}
+      
+      {/* 番茄钟弹窗 */}
+      {activePomodoroTask && (
+        <PomodoroTimer
+          task={activePomodoroTask}
+          onComplete={handlePomodoroComplete}
+          onAbandon={handlePomodoroAbandon}
+          onClose={() => setActivePomodoroTask(null)}
+        />
       )}
     </div>
   );
