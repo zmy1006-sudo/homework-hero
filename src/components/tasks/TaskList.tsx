@@ -72,12 +72,15 @@ export function TaskList({ userId, onTaskChange }: TaskListProps) {
   };
   
   // 番茄钟完成回调
-  const handlePomodoroComplete = (completedTask: Task, distractionCount: number) => {
+  const handlePomodoroComplete = (completedTask: Task, distractionCount: number, overtimeMinutes: number = 0, deductedPoints: number = 0) => {
     loadTasks();
     onTaskChange?.();
     setActivePomodoroTask(null);
-    // 可以在这里添加奖励积分的逻辑
-    if (distractionCount === 0) {
+    
+    // 如果有超时，显示提示
+    if (overtimeMinutes > 0) {
+      console.log(`任务完成！超时了 ${overtimeMinutes} 分钟，扣除 ${deductedPoints} 分`);
+    } else if (distractionCount === 0) {
       console.log('任务完成，无分心！');
     }
   };
