@@ -44,12 +44,160 @@ const CHILDREN_KEY = 'homework-hero-children'
 const CLASS_KEY = 'homework-hero-class'
 
 const SUBJECTS = [
-  { name: '语文', emoji: '📝', color: 'bg-yellow-100 text-yellow-700' },
-  { name: '数学', emoji: '🔢', color: 'bg-blue-100 text-blue-700' },
-  { name: '英语', emoji: '📚', color: 'bg-purple-100 text-purple-700' },
-  { name: '科学', emoji: '🔬', color: 'bg-green-100 text-green-700' },
-  { name: '历史', emoji: '🏛️', color: 'bg-orange-100 text-orange-700' },
-  { name: '其他', emoji: '⭐', color: 'bg-pink-100 text-pink-700' }
+  { 
+    name: '语文', 
+    emoji: '📝', 
+    color: 'bg-yellow-100 text-yellow-700',
+    bgColor: 'bg-yellow-50',
+    borderColor: 'border-yellow-200',
+    accentColor: 'bg-yellow-500',
+    textColor: 'text-yellow-700',
+    lightBg: 'bg-yellow-100/50',
+    hoverBg: 'hover:bg-yellow-100/70'
+  },
+  { 
+    name: '数学', 
+    emoji: '🔢', 
+    color: 'bg-blue-100 text-blue-700',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
+    accentColor: 'bg-blue-500',
+    textColor: 'text-blue-700',
+    lightBg: 'bg-blue-100/50',
+    hoverBg: 'hover:bg-blue-100/70'
+  },
+  { 
+    name: '英语', 
+    emoji: '📚', 
+    color: 'bg-purple-100 text-purple-700',
+    bgColor: 'bg-purple-50',
+    borderColor: 'border-purple-200',
+    accentColor: 'bg-purple-500',
+    textColor: 'text-purple-700',
+    lightBg: 'bg-purple-100/50',
+    hoverBg: 'hover:bg-purple-100/70'
+  },
+  { 
+    name: '科学', 
+    emoji: '🔬', 
+    color: 'bg-green-100 text-green-700',
+    bgColor: 'bg-green-50',
+    borderColor: 'border-green-200',
+    accentColor: 'bg-green-500',
+    textColor: 'text-green-700',
+    lightBg: 'bg-green-100/50',
+    hoverBg: 'hover:bg-green-100/70'
+  },
+  { 
+    name: '历史', 
+    emoji: '🏛️', 
+    color: 'bg-orange-100 text-orange-700',
+    bgColor: 'bg-orange-50',
+    borderColor: 'border-orange-200',
+    accentColor: 'bg-orange-500',
+    textColor: 'text-orange-700',
+    lightBg: 'bg-orange-100/50',
+    hoverBg: 'hover:bg-orange-100/70'
+  },
+  { 
+    name: '地理', 
+    emoji: '🌍', 
+    color: 'bg-teal-100 text-teal-700',
+    bgColor: 'bg-teal-50',
+    borderColor: 'border-teal-200',
+    accentColor: 'bg-teal-500',
+    textColor: 'text-teal-700',
+    lightBg: 'bg-teal-100/50',
+    hoverBg: 'hover:bg-teal-100/70'
+  },
+  { 
+    name: '政治', 
+    emoji: '⚖️', 
+    color: 'bg-indigo-100 text-indigo-700',
+    bgColor: 'bg-indigo-50',
+    borderColor: 'border-indigo-200',
+    accentColor: 'bg-indigo-500',
+    textColor: 'text-indigo-700',
+    lightBg: 'bg-indigo-100/50',
+    hoverBg: 'hover:bg-indigo-100/70'
+  },
+  { 
+    name: '物理', 
+    emoji: '⚛️', 
+    color: 'bg-cyan-100 text-cyan-700',
+    bgColor: 'bg-cyan-50',
+    borderColor: 'border-cyan-200',
+    accentColor: 'bg-cyan-500',
+    textColor: 'text-cyan-700',
+    lightBg: 'bg-cyan-100/50',
+    hoverBg: 'hover:bg-cyan-100/70'
+  },
+  { 
+    name: '化学', 
+    emoji: '🧪', 
+    color: 'bg-lime-100 text-lime-700',
+    bgColor: 'bg-lime-50',
+    borderColor: 'border-lime-200',
+    accentColor: 'bg-lime-500',
+    textColor: 'text-lime-700',
+    lightBg: 'bg-lime-100/50',
+    hoverBg: 'hover:bg-lime-100/70'
+  },
+  { 
+    name: '生物', 
+    emoji: '🧬', 
+    color: 'bg-emerald-100 text-emerald-700',
+    bgColor: 'bg-emerald-50',
+    borderColor: 'border-emerald-200',
+    accentColor: 'bg-emerald-500',
+    textColor: 'text-emerald-700',
+    lightBg: 'bg-emerald-100/50',
+    hoverBg: 'hover:bg-emerald-100/70'
+  },
+  { 
+    name: '美术', 
+    emoji: '🎨', 
+    color: 'bg-rose-100 text-rose-700',
+    bgColor: 'bg-rose-50',
+    borderColor: 'border-rose-200',
+    accentColor: 'bg-rose-500',
+    textColor: 'text-rose-700',
+    lightBg: 'bg-rose-100/50',
+    hoverBg: 'hover:bg-rose-100/70'
+  },
+  { 
+    name: '音乐', 
+    emoji: '🎵', 
+    color: 'bg-violet-100 text-violet-700',
+    bgColor: 'bg-violet-50',
+    borderColor: 'border-violet-200',
+    accentColor: 'bg-violet-500',
+    textColor: 'text-violet-700',
+    lightBg: 'bg-violet-100/50',
+    hoverBg: 'hover:bg-violet-100/70'
+  },
+  { 
+    name: '体育', 
+    emoji: '⚽', 
+    color: 'bg-red-100 text-red-700',
+    bgColor: 'bg-red-50',
+    borderColor: 'border-red-200',
+    accentColor: 'bg-red-500',
+    textColor: 'text-red-700',
+    lightBg: 'bg-red-100/50',
+    hoverBg: 'hover:bg-red-100/70'
+  },
+  { 
+    name: '其他', 
+    emoji: '⭐', 
+    color: 'bg-pink-100 text-pink-700',
+    bgColor: 'bg-pink-50',
+    borderColor: 'border-pink-200',
+    accentColor: 'bg-pink-500',
+    textColor: 'text-pink-700',
+    lightBg: 'bg-pink-100/50',
+    hoverBg: 'hover:bg-pink-100/70'
+  }
 ]
 
 const DISTRACTIONS = [
@@ -175,17 +323,17 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
     localStorage.setItem(RECORDS_KEY, JSON.stringify(records))
   }, [tasks, stars, userStats, rewards, unlockedAchievements, records])
 
-  const addRecord = (type: string, title: string, detail: string, points?: number) => {
+  const addRecord = useCallback((type: string, title: string, detail: string, points?: number) => {
     const newRecord: Record = { id: Date.now(), type, title, detail, points, timestamp: new Date().toISOString() }
     setRecords(prev => [newRecord, ...prev].slice(0, 100))
     saveData()
-  }
+  }, [saveData])
 
   const checkAchievements = useCallback(() => {
     const newUnlocked: string[] = []
     ACHIEVEMENTS.forEach(a => { if (!unlockedAchievements.includes(a.id) && a.condition(userStats)) newUnlocked.push(a.id) })
     if (newUnlocked.length > 0) { setUnlockedAchievements(prev => [...prev, ...newUnlocked]); addRecord('achievement_unlock', '🏆 解锁新成就', `解锁了 ${newUnlocked.length} 个成就`) }
-  }, [userStats, unlockedAchievements])
+  }, [userStats, unlockedAchievements, addRecord])
 
   const addTask = () => {
     if (!newTaskName.trim()) return
@@ -267,6 +415,41 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
         </div>
       </div>
 
+      {/* 学科任务统计 */}
+      {pendingTasks.length + inProgressTasks.length > 0 && (
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 shadow-lg border-2 border-white">
+          <div className="flex items-center gap-2 mb-3">
+            <BookOpen className="w-5 h-5 text-[#4ECDC4]" />
+            <h3 className="font-bold text-gray-700">学科任务分布</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {(() => {
+              const activeTasks = [...pendingTasks, ...inProgressTasks]
+              const subjectStats = activeTasks.reduce((acc, task) => {
+                acc[task.subject] = (acc[task.subject] || 0) + 1
+                return acc
+              }, {} as Record<string, number>)
+
+              return Object.entries(subjectStats)
+                .sort(([,a], [,b]) => (b as number) - (a as number))
+                .slice(0, 6)
+                .map(([subject, count]) => {
+                  const subjectInfo = SUBJECTS.find(s => s.name === subject)
+                  return (
+                    <div key={subject} className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${subjectInfo?.lightBg || 'bg-white/50'} ${subjectInfo?.hoverBg || 'hover:bg-white/70'}`}>
+                      <span className="text-lg">{subjectInfo?.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-700 truncate">{subject}</div>
+                        <div className="text-xs text-gray-500">{count} 项任务</div>
+                      </div>
+                    </div>
+                  )
+                })
+            })()}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-4 gap-2">
         <button onClick={() => setShowAddTask(true)} className="flex flex-col items-center gap-1 p-2 rounded-xl bg-gradient-to-r from-[#FF6B6B] to-[#FD79A8] text-white shadow-md hover:scale-105"><Plus className="w-5 h-5" /><span className="text-[10px] font-medium">添加</span></button>
         <button onClick={() => setCurrentSection('points')} className="flex flex-col items-center gap-1 p-2 rounded-xl bg-gradient-to-r from-[#FFE66D] to-[#FFB347] text-white shadow-md hover:scale-105"><Star className="w-5 h-5" /><span className="text-[10px] font-medium">积分</span></button>
@@ -292,34 +475,129 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
         {tasks.length === 0 ? (
           <div className="text-center py-8 bg-white/60 rounded-2xl border-2 border-white"><div className="text-4xl mb-2">📚</div><p className="text-gray-500 text-sm">还没有作业任务</p></div>
         ) : (
-          <div className="space-y-2">
-            {tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled').slice(0, 10).map(task => (
-              <div key={task.id} className={`bg-white rounded-2xl p-3 shadow-md hover:shadow-lg border-2 hover:border-[#A8E6CF] ${task.status === 'in_progress' ? 'border-[#4ECDC4]' : ''}`}>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => !task.completed && completeTask(task.id)} disabled={task.status === 'in_progress'} className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${task.completed ? 'bg-[#4ECDC4] border-[#4ECDC4]' : task.status === 'in_progress' ? 'bg-[#FFE66D] border-[#FFE66D] animate-pulse' : 'border-[#FFE66D] hover:border-[#4ECDC4]'}`}>{task.completed && <Check className="w-4 h-4 text-white" />}{task.status === 'in_progress' && <Play className="w-3 h-3 text-white" />}</button>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2"><span className={`px-1.5 py-0.5 rounded text-xs font-medium ${SUBJECTS.find(s => s.name === task.subject)?.color || 'bg-gray-100'}`}>{SUBJECTS.find(s => s.name === task.subject)?.emoji}</span><span className={`font-medium text-sm truncate ${task.completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>{task.name}</span></div>
-                    <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5"><Clock className="w-3 h-3" />{task.plannedDuration}分钟 {task.pomodorosCompleted > 0 && <span className="text-[#4ECDC4]">• 🍅 {task.pomodorosCompleted}</span>}</div>
-                  </div>
-                  <div className="flex gap-1">
-                    {task.status === 'pending' && <button onClick={() => { startTask(task.id); setActiveTimer(task); }} className="p-1.5 bg-[#4ECDC4] text-white rounded-lg hover:bg-[#3dbdb5]"><Play className="w-4 h-4" /></button>}
-                    {task.status === 'in_progress' && <button onClick={() => setActiveTimer(task)} className="p-1.5 bg-[#FFE66D] text-white rounded-lg hover:bg-[#ffd43b]"><Play className="w-4 h-4" /></button>}
-                    <button onClick={() => cancelTask(task.id)} className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200"><X className="w-4 h-4" /></button>
-                    <button onClick={() => deleteTask(task.id)} className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100"><Trash2 className="w-4 h-4" /></button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {completedTasks.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-sm font-medium text-gray-500 mb-2">已完成 ({completedTasks.length})</h4>
-                <div className="space-y-1 opacity-60">
-                  {completedTasks.slice(0, 5).map(task => (
-                    <div key={task.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-xl">
-                      <Check className="w-4 h-4 text-[#4ECDC4]" />
-                      <span className="text-sm text-gray-500 line-through">{task.name}</span>
+          <div className="space-y-4">
+            {/* 按学科分组显示作业 */}
+            {(() => {
+              const pendingTasks = tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled')
+              const groupedTasks = pendingTasks.reduce((acc, task) => {
+                if (!acc[task.subject]) acc[task.subject] = []
+                acc[task.subject].push(task)
+                return acc
+              }, {} as Record<string, HomeworkTask[]>)
+
+              return Object.entries(groupedTasks).map(([subject, subjectTasks]) => {
+                const subjectInfo = SUBJECTS.find(s => s.name === subject)
+                return (
+                  <div key={subject} className={`rounded-2xl p-4 shadow-md border-2 transition-all hover:shadow-lg ${subjectInfo?.borderColor || 'border-gray-200'} ${subjectInfo?.bgColor || 'bg-white'} hover:scale-[1.02]`}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-lg">{subjectInfo?.emoji}</span>
+                      <h4 className="font-bold text-gray-700">{subject}</h4>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${subjectInfo?.color || 'bg-gray-100'}`}>
+                        {(subjectTasks as HomeworkTask[]).length} 项
+                      </span>
                     </div>
-                  ))}
+                    <div className="space-y-2">
+                      {(subjectTasks as HomeworkTask[]).slice(0, 5).map(task => (
+                        <div key={task.id} className={`rounded-xl p-3 border-2 hover:border-[#A8E6CF] transition-colors ${task.status === 'in_progress' ? 'border-[#4ECDC4] bg-[#4ECDC4]/5' : 'border-gray-100 bg-gray-50/50'}`}>
+                          <div className="flex items-center gap-3">
+                            <button 
+                              onClick={() => !task.completed && completeTask(task.id)} 
+                              disabled={task.status === 'in_progress'} 
+                              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                                task.completed 
+                                  ? 'bg-[#4ECDC4] border-[#4ECDC4]' 
+                                  : task.status === 'in_progress' 
+                                    ? 'bg-[#FFE66D] border-[#FFE66D] animate-pulse' 
+                                    : 'border-[#FFE66D] hover:border-[#4ECDC4]'
+                              }`}
+                            >
+                              {task.completed && <Check className="w-4 h-4 text-white" />}
+                              {task.status === 'in_progress' && <Play className="w-3 h-3 text-white" />}
+                            </button>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm text-gray-800 truncate">{task.name}</div>
+                              <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                                <Clock className="w-3 h-3" />
+                                {task.plannedDuration}分钟 
+                                {task.pomodorosCompleted > 0 && <span className="text-[#4ECDC4]">• 🍅 {task.pomodorosCompleted}</span>}
+                              </div>
+                            </div>
+                            <div className="flex gap-1">
+                              {task.status === 'pending' && (
+                                <button 
+                                  onClick={() => { startTask(task.id); setActiveTimer(task); }} 
+                                  className="p-1.5 bg-[#4ECDC4] text-white rounded-lg hover:bg-[#3dbdb5] transition-colors"
+                                  title="开始番茄钟"
+                                >
+                                  <Play className="w-4 h-4" />
+                                </button>
+                              )}
+                              {task.status === 'in_progress' && (
+                                <button 
+                                  onClick={() => setActiveTimer(task)} 
+                                  className="p-1.5 bg-[#FFE66D] text-white rounded-lg hover:bg-[#ffd43b] transition-colors animate-pulse"
+                                  title="继续番茄钟"
+                                >
+                                  <Play className="w-4 h-4" />
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => cancelTask(task.id)} 
+                                className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200 transition-colors"
+                                title="取消任务"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => deleteTask(task.id)} 
+                                className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
+                                title="删除任务"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {(subjectTasks as HomeworkTask[]).length > 5 && (
+                        <div className="text-center py-2">
+                          <span className="text-xs text-gray-400">还有 {(subjectTasks as HomeworkTask[]).length - 5} 项...</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })
+            })()}
+
+            {/* 已完成任务汇总 */}
+            {completedTasks.length > 0 && (
+              <div className="bg-white rounded-2xl p-4 shadow-md border-2 border-white">
+                <div className="flex items-center gap-2 mb-3">
+                  <Check className="w-5 h-5 text-[#4ECDC4]" />
+                  <h4 className="font-bold text-gray-700">已完成</h4>
+                  <span className="px-2 py-1 bg-[#4ECDC4] text-white rounded-full text-xs font-medium">
+                    {completedTasks.length} 项
+                  </span>
+                </div>
+                <div className="space-y-1 max-h-32 overflow-y-auto">
+                  {completedTasks.slice(0, 10).map(task => {
+                    const subjectInfo = SUBJECTS.find(s => s.name === task.subject)
+                    return (
+                      <div key={task.id} className={`flex items-center gap-2 p-2 rounded-lg opacity-75 ${subjectInfo?.lightBg || 'bg-gray-50'}`}>
+                        <span className="text-sm">{subjectInfo?.emoji}</span>
+                        <span className="text-sm text-gray-600 line-through flex-1 truncate">{task.name}</span>
+                        <span className="text-xs text-gray-400">
+                          {task.completedAt ? new Date(task.completedAt).toLocaleDateString() : ''}
+                        </span>
+                      </div>
+                    )
+                  })}
+                  {completedTasks.length > 10 && (
+                    <div className="text-center py-1">
+                      <span className="text-xs text-gray-400">还有 {completedTasks.length - 10} 项...</span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

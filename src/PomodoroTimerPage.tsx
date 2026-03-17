@@ -36,16 +36,16 @@ const POMODORO_STORAGE_KEY = 'homework-hero-pomodoro-state'
 
 // V1.6 Apple Watch 风格 SVG 环形进度条
 function PomodoroRing({ progress, isOvertime }: { progress: number; isOvertime: boolean }) {
-  const size = 256
+  const size = 200 // 从256减小到200
   const viewBox = "0 0 256 256"
   
-  // V1.6 规格
-  const outerRadius = 116
-  const innerRadius = 104
-  const progressRadius = 92
-  const outerStrokeWidth = 8
-  const innerStrokeWidth = 4
-  const progressStrokeWidth = 12
+  // V1.6 规格 - 按比例缩放
+  const outerRadius = 92 // 从116减小
+  const innerRadius = 83 // 从104减小
+  const progressRadius = 73 // 从92减小
+  const outerStrokeWidth = 6 // 从8减小
+  const innerStrokeWidth = 3 // 从4减小
+  const progressStrokeWidth = 10 // 从12减小
   
   const circumference = progressRadius * 2 * Math.PI
   const strokeDashoffset = circumference - (progress / 100) * circumference
@@ -65,7 +65,7 @@ function PomodoroRing({ progress, isOvertime }: { progress: number; isOvertime: 
       <defs>
         {/* 发光效果 */}
         <filter id="pomodoro-glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
           <feMerge>
             <feMergeNode in="coloredBlur"/>
             <feMergeNode in="SourceGraphic"/>
@@ -83,7 +83,7 @@ function PomodoroRing({ progress, isOvertime }: { progress: number; isOvertime: 
         strokeWidth={progressStrokeWidth} 
       />
       
-      {/* 外圈：发光效果环 - 半径116，线宽8 */}
+      {/* 外圈：发光效果环 */}
       <circle 
         cx={128} 
         cy={128} 
@@ -96,7 +96,7 @@ function PomodoroRing({ progress, isOvertime }: { progress: number; isOvertime: 
         filter="url(#pomodoro-glow)"
       />
       
-      {/* 进度环 - 半径92，线宽12，圆角末端 */}
+      {/* 进度环 */}
       <circle 
         cx={128} 
         cy={128} 
@@ -111,7 +111,7 @@ function PomodoroRing({ progress, isOvertime }: { progress: number; isOvertime: 
         filter="url(#pomodoro-glow)"
       />
       
-      {/* 内圈：装饰环 - 半径104，线宽4，虚线装饰 */}
+      {/* 内圈：装饰环 */}
       <circle 
         cx={128} 
         cy={128} 
@@ -120,7 +120,7 @@ function PomodoroRing({ progress, isOvertime }: { progress: number; isOvertime: 
         stroke={progressColor} 
         strokeWidth={innerStrokeWidth} 
         strokeLinecap="round" 
-        strokeDasharray="8 6"
+        strokeDasharray="6 4"
         opacity={0.4}
       />
     </svg>
@@ -301,6 +301,17 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
     }
   }, [])
 
+  // 超时弹窗提示
+  useEffect(() => {
+    if (isOvertime && timeLeft === -60) {
+      // 超时1分钟时显示提示
+      const timer = setTimeout(() => {
+        alert('⏰ 已超时！继续完成将扣除积分。\n\n超时每满1分钟扣除1分，不满1分钟不扣除。')
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [isOvertime, timeLeft])
+
   // 处理开始
   const handleStart = () => {
     setIsRunning(true)
@@ -401,15 +412,15 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
   if (showRestModal) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-green-50">
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-green-400 to-emerald-500 px-6 py-4 text-white text-center">
-            <div className="text-4xl mb-2">🎉</div>
-            <h2 className="text-xl font-bold">作业完成！</h2>
+        <div className="w-full max-w-sm mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-green-400 to-emerald-500 px-4 py-3 text-white text-center">
+            <div className="text-3xl mb-2">🎉</div>
+            <h2 className="text-lg font-bold">作业完成！</h2>
             <p className="text-sm opacity-90">你已完成 "{task.name}"</p>
           </div>
           
-          <div className="px-6 py-8 text-center">
-            <div className="text-6xl font-black text-gray-800 mb-4">
+          <div className="px-4 py-6 text-center">
+            <div className="text-4xl font-black text-gray-800 mb-4">
               {formatTime(restTimeLeft)}
             </div>
             <p className="text-gray-600 mb-6">休息一下吧！</p>
@@ -417,14 +428,14 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
             <div className="flex flex-col gap-3">
               <button 
                 onClick={startRest}
-                className="flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white rounded-full font-bold text-lg shadow-lg hover:scale-105 transition-transform"
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white rounded-full font-bold text-base shadow-lg hover:scale-105 transition-transform"
               >
-                <Play className="w-6 h-6" />
+                <Play className="w-5 h-5" />
                 开始休息
               </button>
               <button 
                 onClick={skipRest}
-                className="px-6 py-2 bg-gray-100 text-gray-600 rounded-full font-medium hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 bg-gray-100 text-gray-600 rounded-full font-medium hover:bg-gray-200 transition-colors"
               >
                 跳过休息
               </button>
@@ -441,26 +452,26 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
     
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-green-50">
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-green-400 to-emerald-500 px-6 py-4 text-white">
-            <h2 className="text-xl font-bold text-center">休息时间</h2>
+        <div className="w-full max-w-sm mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-green-400 to-emerald-500 px-4 py-3 text-white">
+            <h2 className="text-lg font-bold text-center">休息时间</h2>
           </div>
           
-          <div className="px-6 py-8 text-center relative">
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="px-4 py-6 text-center">
+            <div className="relative inline-block mb-4">
               <PomodoroRing progress={restProgress} isOvertime={false} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-5xl font-black tracking-wider text-gray-800">
+                <span className="text-3xl font-black tracking-wider text-gray-800">
                   {formatTime(restTimeLeft)}
                 </span>
               </div>
             </div>
           </div>
           
-          <div className="px-6 py-4">
+          <div className="px-4 pb-4">
             <button 
               onClick={skipRest}
-              className="w-full py-3 bg-gray-100 text-gray-600 rounded-full font-medium hover:bg-gray-200 transition-colors"
+              className="w-full py-2 bg-gray-100 text-gray-600 rounded-full font-medium hover:bg-gray-200 transition-colors"
             >
               跳过休息
             </button>
@@ -470,25 +481,14 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
     )
   }
 
-  // 超时弹窗提示
-  useEffect(() => {
-    if (isOvertime && timeLeft === -60) {
-      // 超时1分钟时显示提示
-      const timer = setTimeout(() => {
-        alert('⏰ 已超时！继续完成将扣除积分。\n\n超时每满1分钟扣除1分，不满1分钟不扣除。')
-      }, 100)
-      return () => clearTimeout(timer)
-    }
-  }, [isOvertime, timeLeft])
-
   const currentPoints = calculateCurrentPoints()
   const expectedPoints = calculateExpectedPoints(task.plannedDuration)
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${getBackgroundColor()}`}>
-      <div className={`w-full max-w-md rounded-3xl shadow-2xl overflow-hidden ${getCardStyle()}`}>
+      <div className={`w-full max-w-sm mx-auto rounded-3xl shadow-2xl overflow-hidden ${getCardStyle()}`}>
         {/* 头部 */}
-        <div className={`px-6 py-4 ${isOvertime ? 'bg-red-200' : progress > 80 ? 'bg-red-100' : progress > 50 ? 'bg-orange-100' : 'bg-green-100'}`}>
+        <div className={`px-4 py-3 ${isOvertime ? 'bg-red-200' : progress > 80 ? 'bg-red-100' : progress > 50 ? 'bg-orange-100' : 'bg-green-100'}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="px-2 py-1 rounded-full text-xs font-medium bg-white/80">
@@ -502,17 +502,17 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
             </div>
             <button 
               onClick={handleGiveUp}
-              className="p-2 hover:bg-gray-200 rounded-full"
+              className="p-1.5 hover:bg-gray-200 rounded-full transition-colors"
             >
-              <X className="w-5 h-5 text-gray-500" />
+              <X className="w-4 h-4 text-gray-500" />
             </button>
           </div>
-          <h2 className="text-xl font-bold text-gray-800 mt-2">{task.name}</h2>
-          <p className="text-sm text-gray-500 mt-1">计划时长: {task.plannedDuration} 分钟</p>
+          <h2 className="text-lg font-bold text-gray-800 mt-2 truncate">{task.name}</h2>
+          <p className="text-xs text-gray-500 mt-1">计划时长: {task.plannedDuration} 分钟</p>
         </div>
 
         {/* 分数信息 */}
-        <div className="px-6 py-3 bg-gray-50">
+        <div className="px-4 py-2 bg-gray-50">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
               {!isRunning && timeLeft === task.plannedDuration * 60 && (
@@ -532,8 +532,8 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
         </div>
 
         {/* 进度条 */}
-        <div className="px-6 py-2">
-          <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+        <div className="px-4 py-2">
+          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
             <div 
               className="h-full transition-all duration-1000"
               style={{ 
@@ -549,14 +549,14 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
         </div>
 
         {/* 环形计时器 */}
-        <div className="px-6 py-8 text-center relative">
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -mt-4">
+        <div className="px-4 py-6 text-center">
+          <div className="relative inline-block">
             <PomodoroRing progress={progress} isOvertime={isOvertime} />
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               {isOvertime && (
                 <span className="text-sm font-medium text-red-500 mb-1">超时</span>
               )}
-              <span className="text-5xl font-black tracking-wider text-gray-800">
+              <span className="text-4xl font-black tracking-wider text-gray-800">
                 {isOvertime ? formatOvertimeTime(Math.abs(timeLeft)) : formatTime(timeLeft)}
               </span>
             </div>
@@ -565,7 +565,7 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
 
         {/* 分心记录显示 */}
         {distractions.length > 0 && (
-          <div className="px-6 pb-4">
+          <div className="px-4 pb-3">
             <div className="flex flex-wrap justify-center gap-1">
               {distractions.map((d) => {
                 const distraction = DISTRACTION_TYPES.find(dt => dt.type === d.type)
@@ -583,23 +583,23 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
         )}
 
         {/* 控制按钮 */}
-        <div className="px-6 pb-8">
+        <div className="px-4 pb-6">
           {/* 主控制按钮 */}
           <div className="flex justify-center gap-3 mb-4">
             {!isRunning ? (
               <button 
                 onClick={handleStart}
-                className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white rounded-full font-bold text-lg shadow-lg hover:scale-105 transition-transform"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white rounded-full font-bold text-base shadow-lg hover:scale-105 transition-transform"
               >
-                <Play className="w-6 h-6" />
+                <Play className="w-5 h-5" />
                 开始
               </button>
             ) : (
               <button 
                 onClick={handlePause}
-                className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-orange-400 to-amber-500 text-white rounded-full font-bold text-lg shadow-lg hover:scale-105 transition-transform"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-400 to-amber-500 text-white rounded-full font-bold text-base shadow-lg hover:scale-105 transition-transform"
               >
-                <Pause className="w-6 h-6" />
+                <Pause className="w-5 h-5" />
                 暂停
               </button>
             )}
@@ -607,16 +607,16 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
               onClick={handleReset}
               className="p-3 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors"
             >
-              <RotateCcw className="w-6 h-6 text-gray-600" />
+              <RotateCcw className="w-5 h-5 text-gray-600" />
             </button>
           </div>
 
           {/* 次要操作按钮 */}
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="flex flex-col gap-2">
             {isRunning && (
               <button 
                 onClick={() => setShowDistractionModal(true)}
-                className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full font-medium text-sm hover:bg-yellow-200 transition-colors"
+                className="w-full py-2 bg-yellow-100 text-yellow-700 rounded-full font-medium text-sm hover:bg-yellow-200 transition-colors"
               >
                 📌 记录分心
               </button>
@@ -629,7 +629,7 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
                   handleComplete()
                   setShowRestModal(true)
                 }}
-                className="px-6 py-2 bg-green-500 text-white rounded-full font-medium text-sm hover:bg-green-600 transition-colors"
+                className="w-full py-2 bg-green-500 text-white rounded-full font-medium text-sm hover:bg-green-600 transition-colors"
               >
                 <Check className="w-4 h-4 inline mr-1" />
                 完成 +{expectedPoints}分
@@ -643,7 +643,7 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
                   handleOvertimeComplete()
                   setShowRestModal(true)
                 }}
-                className="px-6 py-2 bg-red-500 text-white rounded-full font-medium text-sm hover:bg-red-600 transition-colors animate-pulse"
+                className="w-full py-2 bg-red-500 text-white rounded-full font-medium text-sm hover:bg-red-600 transition-colors animate-pulse"
               >
                 确认超时 {currentPoints}分
               </button>
@@ -653,7 +653,7 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Pomodo
             {isRunning && (
               <button 
                 onClick={handleGiveUp}
-                className="px-4 py-2 bg-gray-100 text-gray-600 rounded-full font-medium text-sm hover:bg-gray-200 transition-colors"
+                className="w-full py-2 bg-gray-100 text-gray-600 rounded-full font-medium text-sm hover:bg-gray-200 transition-colors"
               >
                 放弃
               </button>
