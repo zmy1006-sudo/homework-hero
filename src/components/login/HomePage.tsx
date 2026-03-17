@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
 import { User } from '../../types';
 import { clearUser, maskPhone, getUserPoints, getRankConfig, calculateProgress } from '../../utils';
-import { BookOpen, User as UserIcon, LogOut, Star, Trophy, Target, Plus, Clock, Flame, ChevronRight } from 'lucide-react';
+import { BookOpen, User as UserIcon, LogOut, Star, Trophy, Target, Plus, Clock, Flame, ChevronRight, Gift, BarChart3 } from 'lucide-react';
 import { TaskModal } from '../tasks/TaskModal';
 import { TaskList } from '../tasks/TaskList';
 import { PointsPage } from '../points/PointsPage';
+import { TeacherPublishPage } from '../teacher/TeacherPublishPage';
+import { TeacherClassPage } from '../teacher/TeacherClassPage';
+import { TeacherStudentsPage } from '../teacher/TeacherStudentsPage';
+import { RewardsPage } from '../parent/RewardsPage';
+import { ExchangeRecordsPage } from '../parent/ExchangeRecordsPage';
+import { FocusReportPage } from '../parent/FocusReportPage';
 
 interface HomePageProps {
   user: User;
@@ -17,6 +23,16 @@ export function HomePage({ user, onLogout }: HomePageProps) {
   const [showPointsPage, setShowPointsPage] = useState(false);
   const [userPoints, setUserPoints] = useState(getUserPoints(user.id));
   const [animateProgress, setAnimateProgress] = useState(false);
+  
+  // 老师端页面状态
+  const [showTeacherPublish, setShowTeacherPublish] = useState(false);
+  const [showTeacherClass, setShowTeacherClass] = useState(false);
+  const [showTeacherStudents, setShowTeacherStudents] = useState(false);
+  
+  // 家长端页面状态
+  const [showRewards, setShowRewards] = useState(false);
+  const [showExchangeRecords, setShowExchangeRecords] = useState(false);
+  const [showFocusReport, setShowFocusReport] = useState(false);
 
   useEffect(() => {
     // 刷新积分数据
@@ -61,6 +77,66 @@ export function HomePage({ user, onLogout }: HomePageProps) {
       <PointsPage 
         user={user} 
         onBack={() => setShowPointsPage(false)} 
+      />
+    );
+  }
+  
+  // 如果显示老师发布作业页面
+  if (showTeacherPublish) {
+    return (
+      <TeacherPublishPage 
+        user={user} 
+        onBack={() => setShowTeacherPublish(false)} 
+      />
+    );
+  }
+  
+  // 如果显示老师班级管理页面
+  if (showTeacherClass) {
+    return (
+      <TeacherClassPage 
+        user={user} 
+        onBack={() => setShowTeacherClass(false)} 
+      />
+    );
+  }
+  
+  // 如果显示老师学生成绩页面
+  if (showTeacherStudents) {
+    return (
+      <TeacherStudentsPage 
+        user={user} 
+        onBack={() => setShowTeacherStudents(false)} 
+      />
+    );
+  }
+  
+  // 如果显示奖励配置页面
+  if (showRewards) {
+    return (
+      <RewardsPage 
+        user={user} 
+        onBack={() => setShowRewards(false)} 
+      />
+    );
+  }
+  
+  // 如果显示兑换记录页面
+  if (showExchangeRecords) {
+    return (
+      <ExchangeRecordsPage 
+        user={user} 
+        onBack={() => setShowExchangeRecords(false)} 
+      />
+    );
+  }
+  
+  // 如果显示专注报告页面
+  if (showFocusReport) {
+    return (
+      <FocusReportPage 
+        user={user} 
+        onBack={() => setShowFocusReport(false)} 
       />
     );
   }
@@ -264,12 +340,34 @@ export function HomePage({ user, onLogout }: HomePageProps) {
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-gray-100">
             <h3 className="font-semibold text-gray-800 mb-4 px-2">家长功能</h3>
             <div className="space-y-2">
-              <button className="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left flex items-center justify-between">
-                <span className="text-gray-700">查看孩子学习情况</span>
+              <button 
+                onClick={() => setShowFocusReport(true)}
+                className="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <BarChart3 className="w-5 h-5 text-violet-500" />
+                  <span className="text-gray-700">专注报告</span>
+                </div>
                 <span className="text-muted-foreground">→</span>
               </button>
-              <button className="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left flex items-center justify-between">
-                <span className="text-gray-700">作业提醒设置</span>
+              <button 
+                onClick={() => setShowRewards(true)}
+                className="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <Gift className="w-5 h-5 text-pink-500" />
+                  <span className="text-gray-700">奖励配置</span>
+                </div>
+                <span className="text-muted-foreground">→</span>
+              </button>
+              <button 
+                onClick={() => setShowExchangeRecords(true)}
+                className="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <Star className="w-5 h-5 text-amber-500" />
+                  <span className="text-gray-700">兑换记录</span>
+                </div>
                 <span className="text-muted-foreground">→</span>
               </button>
             </div>
@@ -280,15 +378,24 @@ export function HomePage({ user, onLogout }: HomePageProps) {
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-gray-100">
             <h3 className="font-semibold text-gray-800 mb-4 px-2">老师功能</h3>
             <div className="space-y-2">
-              <button className="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left flex items-center justify-between">
+              <button 
+                onClick={() => setShowTeacherPublish(true)}
+                className="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left flex items-center justify-between"
+              >
                 <span className="text-gray-700">发布作业</span>
                 <span className="text-muted-foreground">→</span>
               </button>
-              <button className="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left flex items-center justify-between">
+              <button 
+                onClick={() => setShowTeacherClass(true)}
+                className="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left flex items-center justify-between"
+              >
                 <span className="text-gray-700">班级管理</span>
                 <span className="text-muted-foreground">→</span>
               </button>
-              <button className="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left flex items-center justify-between">
+              <button 
+                onClick={() => setShowTeacherStudents(true)}
+                className="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left flex items-center justify-between"
+              >
                 <span className="text-gray-700">学生成绩</span>
                 <span className="text-muted-foreground">→</span>
               </button>

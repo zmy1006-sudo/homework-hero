@@ -83,6 +83,9 @@ export const STORAGE_KEYS = {
   POINTS: 'homework_points',
   POINTS_HISTORY: 'homework_points_history',
   STREAK_DATA: 'homework_streak_data',
+  REWARDS: 'homework_rewards',
+  EXCHANGE_RECORDS: 'homework_exchange_records',
+  FOCUS_SESSIONS: 'homework_focus_sessions',
 } as const;
 
 // ============ 积分系统相关类型 ============
@@ -172,4 +175,72 @@ export interface UserPoints {
   lastPointsDate: string; // 上次积分日期 (YYYY-MM-DD)
   streakData: StreakData;
   rankLevel: RankLevel;
+}
+
+// ============ 奖励系统相关类型 ============
+
+// 奖励状态
+export type RewardStatus = 'active' | 'inactive';
+
+// 奖励
+export interface Reward {
+  id: string;
+  name: string; // 奖励名称
+  pointsRequired: number; // 所需积分
+  description?: string; // 奖励描述
+  status: RewardStatus; // 上架/下架
+  createdAt: string;
+  createdBy: string; // 家长ID
+}
+
+// 兑换记录状态
+export type ExchangeStatus = 'pending' | 'approved' | 'rejected';
+
+// 兑换记录
+export interface ExchangeRecord {
+  id: string;
+  rewardId: string;
+  rewardName: string; // 奖励名称（冗余存储）
+  userId: string; // 孩子ID
+  userName: string; // 孩子名称
+  pointsSpent: number; // 消耗积分
+  status: ExchangeStatus;
+  createdAt: string; // 申请时间
+  reviewedAt?: string; // 审核时间
+  reviewedBy?: string; // 审核人ID
+  rejectReason?: string; // 拒绝原因
+}
+
+// ============ 专注记录相关类型 ============
+
+// 专注会话
+export interface FocusSession {
+  id: string;
+  userId: string;
+  category: TaskCategory; // 任务类别
+  plannedDuration: number; // 计划时长（分钟）
+  actualDuration: number; // 实际专注时长（分钟）
+  startTime: string; // 开始时间
+  endTime: string; // 结束时间
+  interruptions: number; // 中断次数
+  interruptionReasons: string[]; // 中断原因列表
+  completed: boolean; // 是否完成
+}
+
+// 分心类型统计
+export interface DistractionStats {
+  reason: string;
+  count: number;
+  totalMinutes: number;
+}
+
+// 专注报告数据
+export interface FocusReport {
+  totalMinutes: number; // 总专注分钟数
+  averageMinutes: number; // 平均每次专注分钟数
+  maxMinutes: number; // 单次最长专注分钟数
+  totalSessions: number; // 总专注次数
+  categoryBreakdown: Record<TaskCategory, number>; // 各类别用时分布（分钟）
+  distractionStats: DistractionStats[]; // 分心原因统计
+  dailyData: { date: string; minutes: number }[]; // 每日数据趋势
 }

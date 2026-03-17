@@ -1,6 +1,7 @@
 import { User, STORAGE_KEYS } from '../types';
 
 export * from './points';
+export * from './rewards';
 
 /**
  * 保存用户信息到localStorage
