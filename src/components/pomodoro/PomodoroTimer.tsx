@@ -521,7 +521,7 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
           </div>
           
           {/* 环形倒计时 */}
-          <div className="flex justify-center mb-6">
+          <div className="relative flex justify-center mb-6" style={{ width: size, height: size }}>
             <svg
               width={size}
               height={size}
@@ -552,7 +552,7 @@ export function PomodoroTimer({ task, onComplete, onAbandon, onClose }: Pomodoro
             </svg>
             
             {/* 中央时间显示 */}
-            <div className="absolute flex flex-col items-center justify-center" style={{ width: size, height: size }}>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
               {isOvertime ? (
                 // 超时显示
                 <div className="flex flex-col items-center">
