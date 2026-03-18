@@ -313,14 +313,14 @@ function LoginPage({ onLogin }: { onLogin: (user: UserInfo) => void }) {
   const [nickname, setNickname] = useState('')
   const [grade, setGrade] = useState('')
   const [childName, setChildName] = useState('')
-  const [school, setSchool] = useState('')
+  const [school, setSchool] = useState('南京师范大学苏州实验学校')
   const [className, setClassName] = useState('')
   const [classCode, setClassCode] = useState('')
   const [showRoleSelect, setShowRoleSelect] = useState(true)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (role === 'child' && (!nickname.trim() || !classCode.trim())) return
+    if (role === 'child' && (!nickname.trim() || !school.trim() || !grade)) return
     if (role === 'parent' && !childName.trim()) return
     if (role === 'teacher' && (!phone.trim() || !school.trim() || !className.trim())) return
 
@@ -336,9 +336,9 @@ function LoginPage({ onLogin }: { onLogin: (user: UserInfo) => void }) {
       role,
       phone,
       grade: role === 'child' ? grade : undefined,
-      school: role === 'teacher' ? school : undefined,
+      school: school,
       className: role === 'teacher' ? className : undefined,
-      classCode: role === 'child' ? classCode : undefined
+      classCode: role === 'child' ? undefined : undefined
     }
 
     if (role === 'teacher') {
@@ -348,39 +348,11 @@ function LoginPage({ onLogin }: { onLogin: (user: UserInfo) => void }) {
         school,
         code: Math.random().toString(36).substring(2, 8).toUpperCase(),
         students: [],
-        joinRequests: [],
         assignments: [],
-        announcements: []
+        announcements: [],
+        submissions: []
       }
       localStorage.setItem(CLASS_KEY, JSON.stringify(newClass))
-    }
-
-    if (role === 'child') {
-      const savedClass = localStorage.getItem(CLASS_KEY)
-      if (!savedClass) {
-        alert('当前没有可加入的班级，请让老师先创建班级编码。')
-        return
-      }
-      const classInfo: ClassInfo = JSON.parse(savedClass)
-      if (classInfo.code !== classCode.trim()) {
-        alert('班级码不正确，请检查后重试。')
-        return
-      }
-
-      const existingRequest = classInfo.joinRequests.find(r => r.studentId === userId)
-      const alreadyInClass = classInfo.students.some(s => s.id === userId)
-
-      if (!alreadyInClass && !existingRequest) {
-        classInfo.joinRequests.push({
-          id: Date.now(),
-          studentId: userId,
-          nickname,
-          grade,
-          status: 'pending',
-          requestedAt: new Date().toISOString()
-        })
-        localStorage.setItem(CLASS_KEY, JSON.stringify(classInfo))
-      }
     }
 
     onLogin(user)
@@ -396,7 +368,7 @@ function LoginPage({ onLogin }: { onLogin: (user: UserInfo) => void }) {
     return (<div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-pink-50 flex items-center justify-center p-4"><div className="bg-white rounded-3xl p-8 shadow-2xl max-w-sm w-full"><div className="text-center mb-8"><div className="w-20 h-20 bg-gradient-to-br from-[#FF6B6B] to-[#FD79A8] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"><span className="text-xl">🦸</span></div><h1 className="text-2xl font-black bg-gradient-to-r from-[#FF6B6B] to-[#FD79A8] bg-clip-text text-transparent">作业闯关小英雄</h1><p className="text-gray-500 mt-2">让学习更有趣</p></div><div className="space-y-3">{roles.map((r) => (<button key={r.id} onClick={() => { setRole(r.id); setShowRoleSelect(false); }} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-[#FFE66D]/20 to-[#FF6B6B]/10 hover:from-[#FFE66D]/40 hover:to-[#FF6B6B]/20 transition-all border-2 border-transparent hover:border-[#FF6B6B]"><span className="text-3xl">{r.icon}</span><div className="text-left"><div className="font-bold text-gray-800">{r.title}</div><div className="text-xs text-gray-500">{r.desc}</div></div><ChevronRight className="w-5 h-5 text-gray-400 ml-auto" /></button>))}</div></div></div>)
   }
 
-  return (<div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-pink-50 flex items-center justify-center p-4"><div className="bg-white rounded-3xl p-8 shadow-2xl max-w-sm w-full"><button onClick={() => setShowRoleSelect(true)} className="flex items-center gap-1 text-gray-500 mb-4"><ChevronRight className="w-4 h-4 rotate-180" /> 返回</button><div className="text-center mb-6"><div className="w-16 h-16 bg-gradient-to-br from-[#FF6B6B] to-[#FD79A8] rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg"><span className="text-2xl">{roles.find(r => r.id === role)?.icon}</span></div><h2 className="text-xl font-bold text-gray-800">{roles.find(r => r.id === role)?.title}登录</h2></div><form onSubmit={handleSubmit} className="space-y-4">{role === 'child' && (<><div><label className="block text-sm font-medium text-gray-700 mb-2">手机号</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="请输入手机号" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" /></div><div><label className="block text-sm font-medium text-gray-700 mb-2">昵称</label><input type="text" value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="请输入昵称" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" required /></div><div><label className="block text-sm font-medium text-gray-700 mb-2">年级</label><select value={grade} onChange={(e) => setGrade(e.target.value)} className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none"><option value="">选择年级</option><option value="一年级">一年级</option><option value="二年级">二年级</option><option value="三年级">三年级</option><option value="四年级">四年级</option><option value="五年级">五年级</option><option value="六年级">六年级</option><option value="初一">初一</option><option value="初二">初二</option><option value="初三">初三</option></select></div><div><label className="block text-sm font-medium text-gray-700 mb-2">班级码</label><input type="text" value={classCode} onChange={(e) => setClassCode(e.target.value)} placeholder="请输入班级码" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" required /></div></>)}{role === 'parent' && (<><div><label className="block text-sm font-medium text-gray-700 mb-2">手机号</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="请输入手机号" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" /></div><div><label className="block text-sm font-medium text-gray-700 mb-2">绑定孩子昵称</label><input type="text" value={childName} onChange={(e) => setChildName(e.target.value)} placeholder="请输入孩子昵称" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" required /></div></>)}{role === 'teacher' && (<><div><label className="block text-sm font-medium text-gray-700 mb-2">手机号</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="请输入手机号" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" /></div><div><label className="block text-sm font-medium text-gray-700 mb-2">学校</label><input type="text" value={school} onChange={(e) => setSchool(e.target.value)} placeholder="请输入学校名称" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" required /></div><div><label className="block text-sm font-medium text-gray-700 mb-2">班级</label><input type="text" value={className} onChange={(e) => setClassName(e.target.value)} placeholder="请输入班级名称（如：三年级一班）" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" required /></div></>)}<button type="submit" className="w-full py-3 bg-gradient-to-r from-[#FF6B6B] to-[#FD79A8] text-white rounded-xl font-bold text-lg shadow-lg hover:scale-[1.02] transition-transform">登录 ✨</button></form></div></div>)
+  return (<div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-pink-50 flex items-center justify-center p-4"><div className="bg-white rounded-3xl p-8 shadow-2xl max-w-sm w-full"><button onClick={() => setShowRoleSelect(true)} className="flex items-center gap-1 text-gray-500 mb-4"><ChevronRight className="w-4 h-4 rotate-180" /> 返回</button><div className="text-center mb-6"><div className="w-16 h-16 bg-gradient-to-br from-[#FF6B6B] to-[#FD79A8] rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg"><span className="text-2xl">{roles.find(r => r.id === role)?.icon}</span></div><h2 className="text-xl font-bold text-gray-800">{roles.find(r => r.id === role)?.title}登录</h2></div><form onSubmit={handleSubmit} className="space-y-4">{role === 'child' && (<><div><label className="block text-sm font-medium text-gray-700 mb-2">手机号</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="请输入手机号" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" /></div><div><label className="block text-sm font-medium text-gray-700 mb-2">昵称</label><input type="text" value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="请输入昵称" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" required /></div><div><label className="block text-sm font-medium text-gray-700 mb-2">学校</label><input type="text" value={school} onChange={(e) => setSchool(e.target.value)} placeholder="请输入学校名称" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" required /></div><div><label className="block text-sm font-medium text-gray-700 mb-2">年级</label><select value={grade} onChange={(e) => setGrade(e.target.value)} className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none"><option value="">选择年级</option><option value="一年级">一年级</option><option value="二年级">二年级</option><option value="三年级">三年级</option><option value="四年级">四年级</option><option value="五年级">五年级</option><option value="六年级">六年级</option><option value="初一">初一</option><option value="初二">初二</option><option value="初三">初三</option></select></div></>)}{role === 'parent' && (<><div><label className="block text-sm font-medium text-gray-700 mb-2">手机号</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="请输入手机号" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" /></div><div><label className="block text-sm font-medium text-gray-700 mb-2">绑定孩子昵称</label><input type="text" value={childName} onChange={(e) => setChildName(e.target.value)} placeholder="请输入孩子昵称" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" required /></div></>)}{role === 'teacher' && (<><div><label className="block text-sm font-medium text-gray-700 mb-2">手机号</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="请输入手机号" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" /></div><div><label className="block text-sm font-medium text-gray-700 mb-2">学校</label><input type="text" value={school} onChange={(e) => setSchool(e.target.value)} placeholder="请输入学校名称" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" required /></div><div><label className="block text-sm font-medium text-gray-700 mb-2">班级</label><input type="text" value={className} onChange={(e) => setClassName(e.target.value)} placeholder="请输入班级名称（如：三年级一班）" className="w-full px-4 py-3 border-2 border-[#FFE66D] rounded-xl focus:border-[#FF6B6B] focus:outline-none" required /></div></>)}<button type="submit" className="w-full py-3 bg-gradient-to-r from-[#FF6B6B] to-[#FD79A8] text-white rounded-xl font-bold text-lg shadow-lg hover:scale-[1.02] transition-transform">登录 ✨</button></form></div></div>)
 }
 
 function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => void }) {
@@ -418,7 +390,6 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
   const [records, setRecords] = useState<AppRecord[]>([])
   const [classInfo, setClassInfo] = useState<ClassInfo | null>(null)
   const [joinStatus, setJoinStatus] = useState<'none' | 'pending' | 'approved' | 'rejected'>('none')
-  const [joinCode, setJoinCode] = useState(user.classCode || '')
   const [assignmentProgress, setAssignmentProgress] = useState<AssignmentProgress[]>([])
   const [activeTimer, setActiveTimer] = useState<HomeworkTask | null>(null)
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
@@ -446,18 +417,13 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
       const normalized: ClassInfo = {
         ...parsed,
         students: parsed.students || [],
-        joinRequests: parsed.joinRequests || [],
         assignments: parsed.assignments || [],
-        announcements: parsed.announcements || []
+        announcements: parsed.announcements || [],
+        submissions: parsed.submissions || []
       }
       setClassInfo(normalized)
-      setJoinCode(normalized.code)
       const isMember = normalized.students.some(s => s.id === user.id)
-      const request = normalized.joinRequests.find(r => r.studentId === user.id)
-      if (isMember) setJoinStatus('approved')
-      else if (request?.status === 'pending') setJoinStatus('pending')
-      else if (request?.status === 'rejected') setJoinStatus('rejected')
-      else setJoinStatus('none')
+      setJoinStatus(isMember ? 'approved' : 'none')
     }
 
     const savedProgress = localStorage.getItem(`homework-hero-assignment-progress-${user.id}`)
@@ -497,6 +463,24 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
     checkAchievements()
     saveAssignmentProgress()
     saveData()
+
+    // 同步提交到老师端
+    if (classInfo) {
+      const submission: Submission = {
+        assignmentId: assignment.id,
+        studentId: user.id,
+        studentName: user.nickname,
+        submittedAt: new Date().toISOString(),
+        remark: remark.trim(),
+        photo,
+        pointsEarned: points
+      }
+      const updatedClassInfo = { ...classInfo }
+      if (!updatedClassInfo.submissions) updatedClassInfo.submissions = []
+      updatedClassInfo.submissions.push(submission)
+      setClassInfo(updatedClassInfo)
+      localStorage.setItem(CLASS_KEY, JSON.stringify(updatedClassInfo))
+    }
   }
 
   const addRecord = useCallback((type: string, title: string, detail: string, points?: number) => {
@@ -715,28 +699,7 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
             )
           ) : (
             <div className="text-sm text-gray-500">
-              {joinStatus === 'none' ? (
-                <div className="flex flex-col sm:flex-row gap-2 items-center">
-                  <span>请输入班级码加入班级查看作业：</span>
-                  <input value={joinCode} onChange={(e) => setJoinCode(e.target.value)} placeholder="班级码" className="px-3 py-2 border-2 border-[#FFE66D] rounded-xl text-sm" />
-                  <button onClick={() => {
-                    const saved = localStorage.getItem(CLASS_KEY)
-                    if (!saved) { alert('尚未创建班级，请联系老师'); return }
-                    const info = JSON.parse(saved) as ClassInfo
-                    if (info.code !== joinCode.trim()) { alert('班级码不正确'); return }
-                    if (info.students.some(s => s.id === user.id)) { setJoinStatus('approved'); return }
-                    const existing = info.joinRequests.find(r => r.studentId === user.id)
-                    if (!existing) {
-                      info.joinRequests.push({ id: Date.now(), studentId: user.id, nickname: user.nickname, grade: user.grade, status: 'pending', requestedAt: new Date().toISOString() })
-                      localStorage.setItem(CLASS_KEY, JSON.stringify(info))
-                    }
-                    setJoinStatus('pending')
-                    setClassInfo(info)
-                  }} className="px-3 py-2 bg-gradient-to-r from-[#FF6B6B] to-[#FD79A8] text-white rounded-xl text-sm">申请加入</button>
-                </div>
-              ) : (
-                <span>请等待老师审批加入班级。</span>
-              )}
+              班级功能开发中，敬请期待！
             </div>
           )}
         </div>
@@ -1299,9 +1262,9 @@ function TeacherHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
       const normalized: ClassInfo = {
         ...parsed,
         students: parsed.students || [],
-        joinRequests: parsed.joinRequests || [],
         assignments: parsed.assignments || [],
-        announcements: parsed.announcements || []
+        announcements: parsed.announcements || [],
+        submissions: parsed.submissions || []
       }
       setClassInfo(normalized)
       setNewClassSchool(normalized.school || user.school || '')
@@ -1317,9 +1280,9 @@ function TeacherHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
       school: newClassSchool,
       code: Math.random().toString(36).substring(2, 8).toUpperCase(),
       students: [],
-      joinRequests: [],
       assignments: [],
-      announcements: []
+      announcements: [],
+      submissions: []
     }
     setClassInfo(newClass)
     localStorage.setItem(CLASS_KEY, JSON.stringify(newClass))
@@ -1383,34 +1346,7 @@ function TeacherHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
               </div>
             </div>
 
-            {classInfo.joinRequests && classInfo.joinRequests.some(r => r.status === 'pending') && (
-              <div className="bg-white rounded-2xl p-4 shadow-lg">
-                <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2"><Users className="w-5 h-5 text-[#FF6B6B]" />入班申请</h3>
-                {classInfo.joinRequests.filter(r => r.status === 'pending').map(r => (
-                  <div key={r.id} className="flex items-center justify-between border-b last:border-b-0 border-gray-200 py-2">
-                    <div>
-                      <div className="font-medium">{r.nickname}</div>
-                      <div className="text-xs text-gray-500">{r.grade || '暂无年级'} · {new Date(r.requestedAt).toLocaleString()}</div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => {
-                        const updated = { ...classInfo } as ClassInfo
-                        updated.joinRequests = updated.joinRequests.map(j => j.id === r.id ? { ...j, status: 'approved' } : j)
-                        updated.students = [...updated.students, { id: r.studentId, nickname: r.nickname, grade: r.grade, stars: 0, joinedAt: new Date().toISOString() }]
-                        setClassInfo(updated)
-                        localStorage.setItem(CLASS_KEY, JSON.stringify(updated))
-                      }} className="px-3 py-1 bg-[#4ECDC4] text-white rounded-full text-xs">通过</button>
-                      <button onClick={() => {
-                        const updated = { ...classInfo } as ClassInfo
-                        updated.joinRequests = updated.joinRequests.map(j => j.id === r.id ? { ...j, status: 'rejected' } : j)
-                        setClassInfo(updated)
-                        localStorage.setItem(CLASS_KEY, JSON.stringify(updated))
-                      }} className="px-3 py-1 bg-gray-200 text-gray-600 rounded-full text-xs">拒绝</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+
 
             <div className="bg-white rounded-2xl p-4 shadow-lg">
               <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><BookMarked className="w-5 h-5 text-[#FF6B6B]" />发布作业</h3>
@@ -1423,10 +1359,9 @@ function TeacherHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
 
             <div className="bg-white rounded-2xl p-4 shadow-lg">
               <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><BarChart3 className="w-5 h-5 text-[#A8E6CF]" />数据统计</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div className="bg-gray-50 p-3 rounded-xl"><div className="text-2xl font-bold text-[#FFE66D]">{classInfo.students.length}</div><div className="text-xs text-gray-500">学生数</div></div>
                 <div className="bg-gray-50 p-3 rounded-xl"><div className="text-2xl font-bold text-[#4ECDC4]">{classInfo.assignments.length}</div><div className="text-xs text-gray-500">发布作业</div></div>
-                <div className="bg-gray-50 p-3 rounded-xl"><div className="text-2xl font-bold text-[#FF6B6B]">{classInfo.joinRequests.filter(r => r.status === 'pending').length}</div><div className="text-xs text-gray-500">待审批</div></div>
                 <div className="bg-gray-50 p-3 rounded-xl"><div className="text-2xl font-bold text-[#A8E6CF]">{classInfo.announcements.length}</div><div className="text-xs text-gray-500">公告数量</div></div>
               </div>
             </div>
@@ -1457,6 +1392,29 @@ function TeacherHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
               )}
             </div>
 
+            <div className="bg-white rounded-2xl p-4 shadow-lg">
+              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><BookMarked className="w-5 h-5 text-[#FF6B6B]" />作业提交</h3>
+              {(!classInfo.submissions || classInfo.submissions.length === 0) ? (
+                <p className="text-sm text-gray-500">暂无作业提交。</p>
+              ) : (
+                <div className="space-y-3">
+                  {classInfo.submissions.map((sub, index) => (
+                    <div key={index} className="border rounded-xl p-3">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <div className="font-medium">{sub.studentName}</div>
+                          <div className="text-xs text-gray-500">{new Date(sub.submittedAt).toLocaleString()}</div>
+                        </div>
+                        <div className="text-xs text-green-600">+{sub.pointsEarned} 积分</div>
+                      </div>
+                      <div className="text-sm text-gray-600 mb-2">{classInfo.assignments.find(a => a.id === sub.assignmentId)?.title || '未知作业'}</div>
+                      {sub.remark && <div className="text-sm text-gray-600 mb-2">备注：{sub.remark}</div>}
+                      {sub.photo && <img src={sub.photo} alt="提交图片" className="w-full h-24 object-cover rounded-xl" />}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="bg-white rounded-2xl p-4 shadow-lg">
               <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><BookOpen className="w-5 h-5 text-[#FFB347]" />班级公告</h3>
               <div className="mb-3">
