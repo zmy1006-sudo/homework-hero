@@ -58,6 +58,31 @@ const PRESET_SUBJECTS = [
   { name: '历史', emoji: '🏛️', color: 'bg-orange-100 text-orange-700' },
 ]
 
+/** 计时器进度持久化（跨页面保留已计时秒数） */
+const TIMER_ELAPSED_KEY = 'hh-timer-elapsed'
+const TIMER_RUNNING_KEY = 'hh-timer-running'
+
+function getTaskElapsed(taskId: number): number {
+  try {
+    const saved: { [key: string]: number } = JSON.parse(localStorage.getItem(TIMER_ELAPSED_KEY) || '{}')
+    return saved[String(taskId)] || 0
+  } catch { return 0 }
+}
+function setTaskElapsed(taskId: number, elapsed: number) {
+  try {
+    const saved: { [key: string]: number } = JSON.parse(localStorage.getItem(TIMER_ELAPSED_KEY) || '{}')
+    saved[String(taskId)] = elapsed
+    localStorage.setItem(TIMER_ELAPSED_KEY, JSON.stringify(saved))
+  } catch {}
+}
+function clearTaskElapsed(taskId: number) {
+  try {
+    const saved: { [key: string]: number } = JSON.parse(localStorage.getItem(TIMER_ELAPSED_KEY) || '{}')
+    delete saved[String(taskId)]
+    localStorage.setItem(TIMER_ELAPSED_KEY, JSON.stringify(saved))
+  } catch {}
+}
+
 function getSubjectStyle(subjectName: string) {
   const preset = PRESET_SUBJECTS.find(s => s.name === subjectName)
   if (preset) return preset
@@ -390,6 +415,8 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
   const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([])
   const [records, setRecords] = useState<Record[]>([])
   const [activeTimer, setActiveTimer] = useState<HomeworkTask | null>(null)
+  // 记录计时器已过去的秒数（跨组件持久化，避免重新打开时归零）
+  const [timerElapsed, setTimerElapsed] = useState(0)
   const [pointsToast, setPointsToast] = useState<{ pts: number; overtime: boolean; name: string } | null>(null)
 
   useEffect(() => {
@@ -478,6 +505,7 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
 
   const handleTimerComplete = (points: number, isOvertime: boolean, distractions: Distraction[]) => {
     if (!activeTimer) return
+    clearTaskElapsed(activeTimer.id)
     setTasks(tasks.map(t => t.id === activeTimer.id ? { ...t, pomodorosCompleted: t.pomodorosCompleted + 1 } : t))
     setStars(s => s + points)
     const newStats = { totalPomodoros: userStats.totalPomodoros + 1, totalPoints: userStats.totalPoints + points, completedTasks: isOvertime ? userStats.completedTasks : userStats.completedTasks + 1, earlyCompletions: !isOvertime ? userStats.earlyCompletions + 1 : userStats.earlyCompletions, overtimeCompletions: isOvertime ? userStats.overtimeCompletions + 1 : userStats.overtimeCompletions, perfectDays: userStats.perfectDays, currentStreak: userStats.currentStreak, totalRewardsRedeemed: userStats.totalRewardsRedeemed, longestStreak: userStats.longestStreak }
@@ -559,7 +587,7 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
             <div className="mb-3">
               <label className="block text-xs text-gray-500 mb-1">计划时长</label>
               <div className="flex flex-wrap gap-1.5 mb-2">
-                {[15, 25, 45].map(d => (<button key={d} onClick={() => setNewTaskDuration(d)}
+                {[5, 10, 15, 20, 30, 45].map(d => (<button key={d} onClick={() => setNewTaskDuration(d)}
                   className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${newTaskDuration === d ? 'bg-[#FF6B6B] text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-red-50'}`}>
                   {d}分钟
                 </button>))}
@@ -567,7 +595,7 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
               <div className="flex items-center gap-2 px-1">
                 <span className="text-xs text-gray-500 whitespace-nowrap">自定义：</span>
                 <input type="number" min="1" max="180"
-                  value={![15,25,45].includes(newTaskDuration) ? newTaskDuration : ''}
+                  value={![5,10,15,20,30,45].includes(newTaskDuration) ? newTaskDuration : ''}
                   placeholder="输入任意分钟"
                   onChange={(e) => { const val = Number(e.target.value); if(val>=1&&val<=180) setNewTaskDuration(val) }}
                   className="flex-1 px-2 py-1.5 border-2 border-[#FF6B6B] rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-red-200"/>
@@ -581,97 +609,130 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
         {tasks.length === 0 ? (
           <div className="text-center py-8 bg-white/60 rounded-2xl border-2 border-white"><div className="text-4xl mb-2">📚</div><p className="text-gray-500 text-sm">还没有作业任务</p></div>
         ) : (
-          <div className="space-y-2">
-            {tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled').slice(0, 10).map(task => (
-              <div key={task.id} className={`bg-white rounded-2xl p-3 shadow-md hover:shadow-lg border-2 hover:border-[#A8E6CF] ${task.status === 'in_progress' ? 'border-[#4ECDC4]' : ''}`}>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => !task.completed && completeTask(task.id)} disabled={task.status === 'in_progress'} className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${task.completed ? 'bg-[#4ECDC4] border-[#4ECDC4]' : task.status === 'in_progress' ? 'bg-[#FFE66D] border-[#FFE66D] animate-pulse' : 'border-[#FFE66D] hover:border-[#4ECDC4]'}`}>{task.completed && <Check className="w-4 h-4 text-white" />}{task.status === 'in_progress' && <Play className="w-3 h-3 text-white" />}</button>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2"><span className={`px-1.5 py-0.5 rounded text-xs font-medium ${getSubjectStyle(task.subject).color}`}>{getSubjectStyle(task.subject).emoji} {task.subject}</span><span className={`font-medium text-sm truncate ${task.completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>{task.name}</span></div>
-                    <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5"><Clock className="w-3 h-3" />{task.plannedDuration}分钟 {task.pomodorosCompleted > 0 && <span className="text-[#4ECDC4]">• 🍅 {task.pomodorosCompleted}</span>}</div>
-                  </div>
-                  
-          {/* ── 按学科分组显示作业 ── */}
-          {(() => {
-            const activeTasks = tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled')
-            const SUBJECT_ORDER = ['语文','数学','英语','科学','历史']
-            // Group by subject, keeping custom subjects at the end
-            const groups: { [key: string]: HomeworkTask[] } = {}
-            activeTasks.forEach(t => {
-              if (!groups[t.subject]) groups[t.subject] = []
-              groups[t.subject].push(t)
-            })
-            const sortedSubjects = Object.keys(groups).sort((a, b) => {
-              const ai = SUBJECT_ORDER.indexOf(a), bi = SUBJECT_ORDER.indexOf(b)
-              return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
-            })
-            return sortedSubjects.map(subject => {
-              const subjectTasks = groups[subject]
-              const style = getSubjectStyle(subject)
-              return (
-                <div key={subject} className="mb-4">
-                  {/* 学科标题栏 */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${style.color}`}>
-                      {style.emoji} {subject}
-                    </span>
-                    <div className="flex-1 h-px bg-gray-200"/>
-                    <span className="text-xs text-gray-400">{subjectTasks.length}项</span>
-                  </div>
-                  {/* 该学科下的作业 */}
-                  <div className="space-y-2">
-                    {subjectTasks.map(task => (
-                      <div key={task.id}
-                        className={`bg-white rounded-2xl p-3 shadow-sm border-2 hover:shadow-md transition-all ${task.status === 'in_progress' ? 'border-[#4ECDC4]' : 'border-transparent hover:border-[#A8E6CF]'}`}>
-                        <div className="flex items-center gap-3">
-                          <button onClick={() => !task.completed && completeTask(task.id)}
-                            disabled={task.status === 'in_progress'}
-                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${task.status === 'in_progress' ? 'bg-[#FFE66D] border-[#FFE66D] animate-pulse' : 'border-[#FFE66D] hover:border-[#4ECDC4] hover:bg-[#4ECDC4]/10'}`}>
-                            {task.status === 'in_progress' && <Play className="w-3 h-3 text-white"/>}
-                          </button>
-                          <div className="flex-1 min-w-0">
-                            <div className={`font-bold text-sm truncate ${task.status === 'in_progress' ? 'text-gray-800' : 'text-gray-700'}`}>{task.name}</div>
-                            <div className="text-xs text-gray-400 flex items-center gap-1.5 mt-0.5">
-                              <Clock className="w-3 h-3"/>{task.plannedDuration}分钟
-                              {task.pomodorosCompleted > 0 && <span className="text-[#4ECDC4]">🍅×{task.pomodorosCompleted}</span>}
-                              {task.status === 'in_progress' && <span className="text-[#FFE66D] font-bold">进行中</span>}
+          <div>
+            {/* ── 按学科分组 + 全局序号显示作业 ── */}
+            {(() => {
+              const activeTasks = tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled')
+              const SUBJECT_ORDER = ['语文','数学','英语','科学','历史']
+              const groups: { [key: string]: HomeworkTask[] } = {}
+              activeTasks.forEach(t => {
+                if (!groups[t.subject]) groups[t.subject] = []
+                groups[t.subject].push(t)
+              })
+              const sortedSubjects = Object.keys(groups).sort((a, b) => {
+                const ai = SUBJECT_ORDER.indexOf(a), bi = SUBJECT_ORDER.indexOf(b)
+                return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+              })
+              // 全局序号
+              let globalNum = 1
+              // 科目背景色映射（浅底色）
+              const SUBJECT_BG: { [key: string]: string } = {
+                '语文': 'bg-yellow-50',
+                '数学': 'bg-blue-50',
+                '英语': 'bg-purple-50',
+                '科学': 'bg-green-50',
+                '历史': 'bg-orange-50',
+              }
+              const SUBJECT_ACCENT: { [key: string]: string } = {
+                '语文': 'bg-yellow-400',
+                '数学': 'bg-blue-400',
+                '英语': 'bg-purple-400',
+                '科学': 'bg-green-400',
+                '历史': 'bg-orange-400',
+              }
+              const SUBJECT_TEXT: { [key: string]: string } = {
+                '语文': 'text-yellow-700',
+                '数学': 'text-blue-700',
+                '英语': 'text-purple-700',
+                '科学': 'text-green-700',
+                '历史': 'text-orange-700',
+              }
+              return sortedSubjects.map(subject => {
+                const subjectTasks = groups[subject]
+                const style = getSubjectStyle(subject)
+                const bgClass = SUBJECT_BG[subject] || 'bg-indigo-50'
+                const accentClass = SUBJECT_ACCENT[subject] || 'bg-indigo-400'
+                const textClass = SUBJECT_TEXT[subject] || 'text-indigo-700'
+                const tagBg = style.color.split(' ').find(c => c.startsWith('bg-')) || 'bg-indigo-100'
+                const tagText = style.color.split(' ').find(c => c.startsWith('text-')) || 'text-indigo-700'
+                return (
+                  <div key={subject} className={`mb-3 rounded-2xl overflow-hidden ${bgClass} border border-gray-200`}>
+                    {/* 学科标题栏：左侧色条 + emoji + 粗体科目名 + 标签 + 右侧数量 */}
+                    <div className={`flex items-center gap-2 px-3 py-2 border-b border-gray-200/60`}>
+                      <div className={`w-1 h-4 rounded-full ${accentClass} flex-shrink-0`}/>
+                      <span className="text-base">{style.emoji}</span>
+                      <span className="font-bold text-sm text-gray-800">{subject}</span>
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${tagBg} ${tagText}`}>{subject}</span>
+                      <div className="flex-1 h-px bg-gray-200/60"/>
+                      <span className="text-xs text-gray-400">{subjectTasks.length}项</span>
+                    </div>
+                    {/* 该科目下的作业列表 */}
+                    <div className="divide-y divide-gray-100">
+                      {subjectTasks.map(task => {
+                        const num = globalNum++
+                        const inProgress = task.status === 'in_progress'
+                        return (
+                          <div key={task.id} className={`flex items-center gap-3 px-3 py-2.5 hover:bg-black/3 transition-colors ${inProgress ? 'bg-[#4ECDC4]/8' : ''}`}>
+                            {/* 圆形序号 */}
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${inProgress ? 'bg-[#FFE66D] text-yellow-900 animate-pulse' : 'bg-gray-200 text-gray-500'}`}>
+                              {num}
+                            </div>
+                            {/* 完成勾选 */}
+                            <button onClick={() => !inProgress && completeTask(task.id)} disabled={inProgress}
+                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${inProgress ? 'bg-[#FFE66D] border-[#FFE66D]' : 'border-[#4ECDC4] hover:bg-[#4ECDC4]/10'}`}>
+                              {inProgress && <Play className="w-2.5 h-2.5 text-white"/>}
+                            </button>
+                            {/* 作业名 + 时长 */}
+                            <div className="flex-1 min-w-0">
+                              <div className={`font-medium text-sm truncate ${inProgress ? 'text-gray-900' : 'text-gray-700'}`}>{task.name}</div>
+                              <div className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                                <Clock className="w-3 h-3"/>{task.plannedDuration}分钟
+                                {task.pomodorosCompleted > 0 && <span className="text-[#4ECDC4]">🍅×{task.pomodorosCompleted}</span>}
+                                {inProgress && <span className="ml-1 px-1.5 py-0.5 bg-[#FFE66D] text-yellow-900 rounded text-xs font-bold">进行中</span>}
+                              </div>
+                            </div>
+                            {/* 操作按钮（始终显示） */}
+                            <div className="flex gap-1.5 flex-shrink-0">
+                              {task.status === 'pending' && (
+                                <button onClick={() => { startTask(task.id); setActiveTimer(task); }}
+                                  className="px-3 py-1.5 bg-[#4ECDC4] text-white rounded-lg hover:bg-[#3dbdb5] text-xs font-medium shadow-sm transition-all">
+                                  ▶ 开始
+                                </button>
+                              )}
+                              {inProgress && (
+                                <button onClick={() => { setActiveTimer(task); setTimerElapsed(getTaskElapsed(task.id)); }}
+                                  className="px-3 py-1.5 bg-[#FFE66D] text-yellow-900 rounded-lg hover:bg-[#ffd43b] text-xs font-bold shadow-sm">
+                                  ▶▶ 继续计时
+                                </button>
+                              )}
+                              <button onClick={() => cancelTask(task.id)}
+                                className="p-1.5 bg-white text-gray-400 rounded-lg hover:bg-gray-100 border border-gray-200">
+                                <X className="w-3.5 h-3.5"/>
+                              </button>
+                              <button onClick={() => deleteTask(task.id)}
+                                className="p-1.5 bg-white text-red-400 rounded-lg hover:bg-red-50 border border-red-100">
+                                <Trash2 className="w-3.5 h-3.5"/>
+                              </button>
                             </div>
                           </div>
-                          <div className="flex gap-1">
-                            {task.status === 'pending' && <button onClick={() => { startTask(task.id); setActiveTimer(task); }}
-                              className="p-1.5 bg-[#4ECDC4] text-white rounded-lg hover:bg-[#3dbdb5]"><Play className="w-4 h-4"/></button>}
-                            {task.status === 'in_progress' && <button onClick={() => setActiveTimer(task)}
-                              className="p-1.5 bg-[#FFE66D] text-white rounded-lg hover:bg-[#ffd43b]"><Play className="w-4 h-4"/></button>}
-                            <button onClick={() => cancelTask(task.id)}
-                              className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200"><X className="w-4 h-4"/></button>
-                            <button onClick={() => deleteTask(task.id)}
-                              className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100"><Trash2 className="w-4 h-4"/></button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
-              )
-            })
-          })()}
-          <div className="flex gap-1">
-                    {task.status === 'pending' && <button onClick={() => { startTask(task.id); setActiveTimer(task); }} className="p-1.5 bg-[#4ECDC4] text-white rounded-lg hover:bg-[#3dbdb5]"><Play className="w-4 h-4" /></button>}
-                    {task.status === 'in_progress' && <button onClick={() => setActiveTimer(task)} className="p-1.5 bg-[#FFE66D] text-white rounded-lg hover:bg-[#ffd43b]"><Play className="w-4 h-4" /></button>}
-                    <button onClick={() => cancelTask(task.id)} className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200"><X className="w-4 h-4" /></button>
-                    <button onClick={() => deleteTask(task.id)} className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100"><Trash2 className="w-4 h-4" /></button>
-                  </div>
-                </div>
-              </div>
-            ))}
+                )
+              })
+            })()}
+            {/* 已完成作业 */}
             {completedTasks.length > 0 && (
               <div className="mt-4">
-                <h4 className="text-sm font-medium text-gray-500 mb-2">已完成 ({completedTasks.length})</h4>
-                <div className="space-y-1 opacity-60">
+                <h4 className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-1">
+                  <Check className="w-4 h-4"/>已完成 ({completedTasks.length})
+                </h4>
+                <div className="space-y-1">
                   {completedTasks.slice(0, 5).map(task => (
                     <div key={task.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-xl">
                       <Check className="w-4 h-4 text-[#4ECDC4]" />
-                      <span className="text-sm text-gray-500 line-through">{task.name}</span>
+                      <span className="text-sm text-gray-400 line-through">{task.name}</span>
                     </div>
                   ))}
                 </div>
@@ -925,7 +986,7 @@ function StudentHomePage({ user, onLogout }: { user: UserInfo; onLogout: () => v
         </div>
       </nav>
 
-      {activeTimer && <PomodoroTimerPage task={activeTimer} onComplete={handleTimerComplete} onCancel={() => setActiveTimer(null)} />}
+      {activeTimer && <PomodoroTimerPage task={activeTimer} initialElapsed={timerElapsed} onComplete={handleTimerComplete} onCancel={() => setActiveTimer(null)} onElapsedUpdate={(elapsed) => setTaskElapsed(activeTimer.id, elapsed)} />}
 
       {/* 积分提示 Toast */}
       {pointsToast && (

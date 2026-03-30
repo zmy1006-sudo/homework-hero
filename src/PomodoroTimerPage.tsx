@@ -75,17 +75,19 @@ function TomatoRing({ progress, isOvertime, size = 280 }: { progress: number; is
 
 function fmt(secs: number) { return `${Math.floor(Math.abs(secs)/60)}:${(Math.abs(secs)%60).toString().padStart(2,'0')}` }
 
-interface Props { task: HomeworkTask; onComplete: (pts: number, iso: boolean, dist: Distraction[]) => void; onCancel: () => void }
+interface Props { task: HomeworkTask; initialElapsed?: number; onComplete: (pts: number, iso: boolean, dist: Distraction[]) => void; onCancel: () => void; onElapsedUpdate?: (elapsed: number) => void }
 
-export default function PomodoroTimerPage({ task, onComplete, onCancel }: Props) {
+export default function PomodoroTimerPage({ task, initialElapsed = 0, onComplete, onCancel, onElapsedUpdate }: Props) {
   const TOTAL = task.plannedDuration * 60
 
-  const [elapsed, setElapsed] = useState(0)
+  const [elapsed, setElapsed] = useState(initialElapsed)
   const [isRunning, setIsRunning] = useState(false)
   const [distractions, setDistractions] = useState<Distraction[]>([])
   const [showDistraction, setShowDistraction] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const audioCtxRef = useRef<AudioContext | null>(null)
+  const onElapsedRef = useRef(onElapsedUpdate)
+  onElapsedRef.current = onElapsedUpdate
   const lastBeepRef = useRef<number>(-1)
   const milestoneFiredRef = useRef<Set<number>>(new Set())
 
@@ -129,6 +131,9 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Props)
       // 超时每2秒嘟
       if (rem < 0 && (e - TOTAL) % 2 === 0) { _doBeep(660, 200) }
 
+      // 同步已计时秒数到父组件（用于「继续计时」持久化）
+      onElapsedRef.current?.(e)
+
       return e
     })
   }, [TOTAL])
@@ -160,7 +165,7 @@ export default function PomodoroTimerPage({ task, onComplete, onCancel }: Props)
 
   const handleCancel = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
-    setIsRunning(false); localStorage.removeItem(STORAGE_KEY); onCancel()
+    setIsRunning(false); onCancel()
   }
 
   const addDistraction = (type: string) => {
